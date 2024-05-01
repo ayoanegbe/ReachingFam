@@ -1,0 +1,1218 @@
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis.Classification;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using ReachingFam.Core.Data;
+using ReachingFam.Core.Enums;
+using ReachingFam.Core.Interfaces;
+using ReachingFam.Core.Models;
+using ReachingFam.Core.Models.DataViewModels;
+using ReachingFam.Core.Models.ReachingFamViewModels;
+using ReachingFam.Core.Services;
+using System.Linq;
+
+namespace ReachingFam.Controllers
+{
+    public class ProcessManagementController(
+        ILogger<SetupController> logger,
+        ApplicationDbContext context,
+        CustomIDataProtection protector,
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        RoleManager<IdentityRole> roleManager,
+        IApprovalService approvalService,
+        IFileService fileService,
+        IResolverService resolverService
+            ) : Controller
+    {
+        private readonly ApplicationDbContext _context = context;
+        private readonly CustomIDataProtection _protector = protector;
+        private readonly ILogger<SetupController> _logger = logger;
+        private readonly UserManager<ApplicationUser> _userManager = userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager = roleManager;
+        private readonly IApprovalService _approvalService = approvalService;
+        private readonly IFileService _fileService = fileService;
+        private readonly IResolverService _resolverService = resolverService;
+
+        public async Task<IActionResult> InwardItemsList()
+        {
+            return View(await _context.InwardItems.Include(x => x.Donor).OrderByDescending(x => x.InwardItemId).ToListAsync());
+        }
+
+        public IActionResult AddInwardItem()
+        {
+            ViewData["DonorId"] = new SelectList(_context.Donors, "DonorId", "Name");
+
+            return View(new InwardItemViewModel() { CollectionDate = DateTime.Now} );
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddInwardItem([Bind("DonorId,CollectionDate,TotalWeight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight,File")] InwardItemViewModel inwardItemView)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            string filePath = string.Empty;
+            string message = string.Empty;
+            string thumbnailPath = string.Empty;
+
+            (filePath, thumbnailPath, message) = await ProcessFile(inwardItemView.File, "images", "donors");
+
+            if (message != "Success")
+            {
+                ViewBag.Message = message;
+                return View(inwardItemView);
+            }
+           
+            var totalWeight = inwardItemView.NonPerishablesWeight + inwardItemView.PerishablesWeight + inwardItemView.FrozenWeight + inwardItemView.NonFoodWeight;
+
+            InwardItem inwardItem = new()
+            {
+                DonorId = inwardItemView.DonorId,
+                CollectionDate = inwardItemView.CollectionDate,
+                TotalWeight = (double)totalWeight,
+                NonPerishables = inwardItemView.NonPerishables,
+                NonPerishablesWeight = inwardItemView.NonPerishablesWeight,
+                Perishables = inwardItemView.Perishables,
+                PerishablesWeight = inwardItemView.PerishablesWeight,
+                Frozen = inwardItemView.Frozen,
+                FrozenWeight = inwardItemView.FrozenWeight,
+                NonFood = inwardItemView.NonFood,
+                NonFoodWeight = inwardItemView.NonFoodWeight,
+                AddedBy = user.UserName,
+                DateAdded = DateTime.Now,
+                FilePath = filePath,
+                ThumbnailPath = thumbnailPath,
+            };
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    await _context.AddAsync(inwardItem);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(InwardItemsList));
+                }
+                else
+                {
+                    ViewBag.Message = "Unable to save changes. " +
+                        "Try again, and if the problem persists, " +
+                        "see your system administrator.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, ex, $"An error has occurred when trying to write into {inwardItem.GetType().Name} table");
+            }
+
+            ViewData["DonorId"] = new SelectList(_context.Donors, "DonorId", "Name");
+
+            return View(inwardItemView);
+        }
+
+        public async Task<IActionResult> EditInwardItem(string id)
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var inwardItem = await _context.InwardItems.Include(x => x.Donor).FirstOrDefaultAsync(x => x.InwardItemId == num);
+            if (inwardItem == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            InwardItemViewModel inwardItemView = new()
+            {
+                InwardItemId = inwardItem.InwardItemId,
+                DonorId = inwardItem.DonorId,
+                CollectionDate = inwardItem.CollectionDate,
+                TotalWeight = inwardItem.TotalWeight,
+                NonPerishables = inwardItem.NonPerishables,
+                NonPerishablesWeight = inwardItem.NonPerishablesWeight,
+                Perishables = inwardItem.Perishables,
+                PerishablesWeight = inwardItem.PerishablesWeight,
+                Frozen = inwardItem.Frozen,
+                FrozenWeight = inwardItem.FrozenWeight,
+                NonFood = inwardItem.NonFood,
+                NonFoodWeight = inwardItem.NonFoodWeight,
+            };
+
+            ViewData["DonorId"] = new SelectList(_context.Donors, "DonorId", "Name", inwardItem.InwardItemId);
+
+            return View(inwardItemView);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditInwardItem(string id, [Bind("InwardItemId,DonorId,CollectionDate,TotalWeight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight")] InwardItemViewModel inwardItemView)
+        {
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            if (num != inwardItemView.InwardItemId)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            var totalWeight = inwardItemView.NonPerishablesWeight + inwardItemView.PerishablesWeight + inwardItemView.FrozenWeight + inwardItemView.NonFoodWeight;
+
+            InwardItem inwardItem = new()
+            {
+                InwardItemId = inwardItemView.InwardItemId,
+                DonorId = inwardItemView.DonorId,
+                CollectionDate = inwardItemView.CollectionDate,
+                TotalWeight = (double)totalWeight,
+                NonPerishables = inwardItemView.NonPerishables,
+                NonPerishablesWeight = inwardItemView.NonPerishablesWeight,
+                Perishables = inwardItemView.Perishables,
+                PerishablesWeight = inwardItemView.PerishablesWeight,
+                Frozen = inwardItemView.Frozen,
+                FrozenWeight = inwardItemView.FrozenWeight,
+                NonFood = inwardItemView.NonFood,
+                NonFoodWeight = inwardItemView.NonFoodWeight,
+                UpdatedBy = user.UserName,
+                DateUpdated = DateTime.Now
+            };
+
+            var oldValue = JsonConvert.SerializeObject(await _context.InwardItems.FirstOrDefaultAsync(x => x.InwardItemId == inwardItem.InwardItemId));
+            var newValue = JsonConvert.SerializeObject(inwardItem);
+
+
+            if (await _approvalService.UpdateApprovalQueue(inwardItem.GetType().Name, "Inward Item", UpdateAction.Update, oldValue, newValue, user.UserName))
+            {
+                ViewBag.Approval = "Your changes have been forwarded for approval";
+            }
+            else
+            {
+                ViewBag.Message = "Unable to save changes. " +
+                    "Try again, and if the problem persists, " +
+                    "see your system administrator.";
+            }
+
+            ViewData["DonorId"] = new SelectList(_context.Donors, "DonorId", "Name", inwardItem.InwardItemId);
+
+            return View(inwardItemView);
+        }
+
+        public async Task<IActionResult> FamilyHamperList()
+        {
+            return View(await _context.Hampers.Include(x => x.Family).OrderByDescending(x => x.HamperId).ToListAsync());
+        }
+
+        public IActionResult AddFamilyHamper()
+        {
+            ViewData["FamilyId"] = new SelectList(_context.Families, "FamilyId", "FullName");
+
+            return View( new HamperViewModel() { CollectionDate = DateTime.Today, CollectionTime = DateTime.Now});
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddFamilyHamper([Bind("FamilyId,CollectionDate,CollectionTime,Weight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight,FamilySize,Seniors,Adults,Children,Collected")] HamperViewModel hamperView)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            string filePath = string.Empty;
+            string message = string.Empty;
+            string thumbnailPath = string.Empty;
+
+            (filePath, thumbnailPath, message) = await ProcessFile(hamperView.File, "images", "donors");
+
+            if (message != "Success")
+            {
+                ViewBag.Message = message;
+                return View(hamperView);
+            }
+
+            try
+            {
+                int familySize = (int)(hamperView.Seniors + hamperView.Adults + hamperView.Children);
+                if (familySize != hamperView.FamilySize)
+                {
+                    ViewBag.Message = "Inconsistencies in family size. Please verify";
+                    return View(hamperView);
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Message = "Inconsistencies in family size. Please verify";
+                _logger.Log(LogLevel.Error, ex, "Inconsistencies in family size");
+                return View(hamperView);
+            }
+
+            var totalWeight = hamperView.NonPerishablesWeight + hamperView.PerishablesWeight + hamperView.FrozenWeight + hamperView.NonFoodWeight;
+
+            Hamper hamper = new()
+            {
+                FamilyId = hamperView.FamilyId,
+                CollectionDate = hamperView.CollectionDate,
+                CollectionTime = hamperView.CollectionTime,
+                Weight = (double)totalWeight,
+                NonPerishables = hamperView.NonPerishables,
+                NonPerishablesWeight = hamperView.NonPerishablesWeight,
+                Perishables = hamperView.Perishables,
+                PerishablesWeight = hamperView.PerishablesWeight,
+                Frozen = hamperView.Frozen,
+                FrozenWeight = hamperView.FrozenWeight,
+                NonFood = hamperView.NonFood,
+                NonFoodWeight = hamperView.NonFoodWeight,
+                FamilySize = hamperView.FamilySize,
+                Seniors = hamperView.Seniors,
+                Adults = hamperView.Adults,
+                Children = hamperView.Children,
+                Collected = hamperView.Collected,
+                AddedBy = user.UserName,
+                DateAdded = DateTime.Now,
+                FilePath = filePath,
+                ThumbnailPath = thumbnailPath,
+            };
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    await _context.AddAsync(hamper);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(FamilyHamperList));
+                }
+                else
+                {
+                    ViewBag.Message = "Unable to save changes. " +
+                        "Try again, and if the problem persists, " +
+                        "see your system administrator.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, ex, $"An error has occurred when trying to write into {hamper.GetType().Name} table");
+            }
+
+            ViewData["FamilyId"] = new SelectList(_context.Families, "FamilyId", "FullName");
+
+            return View(hamperView);
+        }
+
+        public async Task<IActionResult> EditFamilyHamper(string id)
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var hamper = await _context.Hampers.Include(x => x.Family).FirstOrDefaultAsync(x => x.HamperId == num);
+            if (hamper == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            HamperViewModel hamperView = new()
+            {
+                HamperId = hamper.HamperId,
+                FamilyId = hamper.FamilyId,
+                CollectionDate = hamper.CollectionDate,
+                CollectionTime = hamper.CollectionTime,
+                Weight = hamper.Weight,
+                NonPerishables = hamper.NonPerishables,
+                NonPerishablesWeight = hamper.NonPerishablesWeight,
+                Perishables = hamper.Perishables,
+                PerishablesWeight = hamper.PerishablesWeight,
+                Frozen = hamper.Frozen,
+                FrozenWeight = hamper.FrozenWeight,
+                NonFood = hamper.NonFood,
+                NonFoodWeight = hamper.NonFoodWeight,
+                FamilySize = hamper.FamilySize,
+                Seniors = hamper.Seniors,
+                Adults = hamper.Adults,
+                Children = hamper.Children,
+                Collected = hamper.Collected
+            };
+
+            ViewData["FamilyId"] = new SelectList(_context.Families, "FamilyId", "FullName", hamper.HamperId);
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditFamilyHamper(string id, [Bind("HamperId,FamilyId,CollectionDate,CollectionTime,Weight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight,FamilySize,Seniors,Adults,Children,Collected")] HamperViewModel hamperView)
+        {
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            if (num != hamperView.HamperId)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            try
+            {
+                int familySize = (int)(hamperView.Seniors + hamperView.Adults + hamperView.Children);
+                if (familySize != hamperView.FamilySize)
+                {
+                    ViewBag.Message = "Inconsistencies in family size. Please verify";
+                    return View(hamperView);
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Message = "Inconsistencies in family size. Please verify";
+                _logger.Log(LogLevel.Error, ex, "Inconsistencies in family size");
+                return View(hamperView);
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            var totalWeight = hamperView.NonPerishablesWeight + hamperView.PerishablesWeight + hamperView.FrozenWeight + hamperView.NonFoodWeight;
+
+            Hamper hamper = new()
+            {
+                HamperId = hamperView.HamperId,
+                FamilyId = hamperView.FamilyId,
+                CollectionDate = hamperView.CollectionDate,
+                CollectionTime = hamperView.CollectionTime,
+                Weight = (double)totalWeight,
+                NonPerishables = hamperView.NonPerishables,
+                NonPerishablesWeight = hamperView.NonPerishablesWeight,
+                Perishables = hamperView.Perishables,
+                PerishablesWeight = hamperView.PerishablesWeight,
+                Frozen = hamperView.Frozen,
+                FrozenWeight = hamperView.FrozenWeight,
+                NonFood = hamperView.NonFood,
+                NonFoodWeight = hamperView.NonFoodWeight,
+                FamilySize = hamperView.FamilySize,
+                Seniors = hamperView.Seniors,
+                Adults = hamperView.Adults,
+                Children = hamperView.Children,
+                Collected = hamperView.Collected,
+                UpdatedBy = user.UserName,
+                DateUpdated = DateTime.Now
+            };
+
+            var oldValue = JsonConvert.SerializeObject(await _context.Hampers.FirstOrDefaultAsync(x => x.HamperId == hamper.HamperId));
+            var newValue = JsonConvert.SerializeObject(hamper);
+
+            if (await _approvalService.UpdateApprovalQueue(hamper.GetType().Name, "Family Hamper", UpdateAction.Update, oldValue, newValue, user.UserName))
+            {
+                ViewBag.Approval = "Your changes have been forwarded for approval";
+            }
+            else
+            {
+                ViewBag.Message = "Unable to save changes. " +
+                    "Try again, and if the problem persists, " +
+                    "see your system administrator.";
+            }
+
+            ViewData["FamilyId"] = new SelectList(_context.Families, "FamilyId", "FullName", hamper.HamperId);
+
+            return View(hamperView);
+        }
+
+        public async Task<IActionResult> PartnerGiveOutList()
+        {
+            return View(await _context.PartnerGiveOuts.Include(x => x.Partner).OrderByDescending(x => x.PartnerGiveOutId).ToListAsync());
+        }
+
+        public IActionResult AddPartnerGiveOut()
+        {
+            ViewData["PartnerId"] = new SelectList(_context.Partners, "PartnerId", "Name");
+
+            return View( new PartnerGiveOutViewModel() { CollectionDate = DateTime.Today, CollectionTime = DateTime.Now });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddPartnerGiveOut([Bind("PartnerId,CollectionDate,CollectionTime,Weight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight,Collected,File")] PartnerGiveOutViewModel partnerGiveOutView)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            string filePath = string.Empty;
+            string message = string.Empty;
+            string thumbnailPath = string.Empty;
+
+            (filePath, thumbnailPath, message) = await ProcessFile(partnerGiveOutView.File, "images", "donors");
+
+            if (message != "Success")
+            {
+                ViewBag.Message = message;
+                return View(partnerGiveOutView);
+            }
+
+            var totalWeight = partnerGiveOutView.NonPerishablesWeight + partnerGiveOutView.PerishablesWeight + partnerGiveOutView.FrozenWeight + partnerGiveOutView.NonFoodWeight;
+
+            PartnerGiveOut partnerGiveOut = new()
+            {
+                PartnerId = partnerGiveOutView.PartnerId,
+                CollectionDate = partnerGiveOutView.CollectionDate,
+                CollectionTime = partnerGiveOutView.CollectionTime,
+                Weight = (double)totalWeight,
+                NonPerishables = partnerGiveOutView.NonPerishables,
+                NonPerishablesWeight = partnerGiveOutView.NonPerishablesWeight,
+                Perishables = partnerGiveOutView.Perishables,
+                PerishablesWeight = partnerGiveOutView.PerishablesWeight,
+                Frozen = partnerGiveOutView.Frozen,
+                FrozenWeight = partnerGiveOutView.FrozenWeight,
+                NonFood = partnerGiveOutView.NonFood,
+                NonFoodWeight = partnerGiveOutView.NonFoodWeight,
+                Collected = partnerGiveOutView.Collected,
+                AddedBy = user.UserName,
+                DateAdded = DateTime.Now,
+                FilePath = filePath,
+                ThumbnailPath = thumbnailPath,
+            };
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    await _context.AddAsync(partnerGiveOut);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(PartnerGiveOutList));
+                }
+                else
+                {
+                    ViewBag.Message = "Unable to save changes. " +
+                        "Try again, and if the problem persists, " +
+                        "see your system administrator.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, ex, $"An error has occurred when trying to write into {partnerGiveOut.GetType().Name} table");
+            }
+
+            ViewData["PartnerId"] = new SelectList(_context.Partners, "PartnerId", "Name");
+
+            return View(partnerGiveOutView);
+        }
+
+        public async Task<IActionResult> EditPartnerGiveOut(string id)
+        {
+            if(id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var partnerGiveOut = await _context.PartnerGiveOuts.Include(x => x.Partner).FirstOrDefaultAsync(x => x.PartnerGiveOutId == num);
+            if (partnerGiveOut == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            PartnerGiveOutViewModel partnerGiveOutView = new()
+            {
+                PartnerGiveOutId = partnerGiveOut.PartnerGiveOutId,
+                PartnerId = partnerGiveOut.PartnerId,
+                CollectionDate = partnerGiveOut.CollectionDate,
+                CollectionTime = partnerGiveOut.CollectionTime,
+                Weight = partnerGiveOut.Weight,
+                NonPerishables = partnerGiveOut.NonPerishables,
+                NonPerishablesWeight = partnerGiveOut.NonPerishablesWeight,
+                Perishables = partnerGiveOut.Perishables,
+                PerishablesWeight = partnerGiveOut.PerishablesWeight,
+                Frozen = partnerGiveOut.Frozen,
+                FrozenWeight = partnerGiveOut.FrozenWeight,
+                NonFood = partnerGiveOut.NonFood,
+                NonFoodWeight = partnerGiveOut.NonFoodWeight,
+                Collected = partnerGiveOut.Collected
+            };
+
+            ViewData["PartnerId"] = new SelectList(_context.Partners, "PartnerId", "Name", partnerGiveOutView.PartnerGiveOutId);
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditPartnerGiveOut(string id, [Bind("PartnerGiveOutId,PartnerId,CollectionDate,CollectionTime,Weight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight,Collected")] PartnerGiveOutViewModel partnerGiveOutView)
+        {
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            if (num != partnerGiveOutView.PartnerGiveOutId)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            var totalWeight = partnerGiveOutView.NonPerishablesWeight + partnerGiveOutView.PerishablesWeight + partnerGiveOutView.FrozenWeight + partnerGiveOutView.NonFoodWeight;
+
+            PartnerGiveOut partnerGiveOut = new()
+            {
+                PartnerGiveOutId = partnerGiveOutView.PartnerGiveOutId,
+                PartnerId = partnerGiveOutView.PartnerId,
+                CollectionDate = partnerGiveOutView.CollectionDate,
+                CollectionTime = partnerGiveOutView.CollectionTime,
+                Weight = (double)totalWeight,
+                NonPerishables = partnerGiveOutView.NonPerishables,
+                NonPerishablesWeight = partnerGiveOutView.NonPerishablesWeight,
+                Perishables = partnerGiveOutView.Perishables,
+                PerishablesWeight = partnerGiveOutView.PerishablesWeight,
+                Frozen = partnerGiveOutView.Frozen,
+                FrozenWeight = partnerGiveOutView.FrozenWeight,
+                NonFood = partnerGiveOutView.NonFood,
+                NonFoodWeight = partnerGiveOutView.NonFoodWeight,
+                Collected = partnerGiveOutView.Collected,
+                UpdatedBy = user.UserName,
+                DateUpdated = DateTime.Now
+            };
+
+            var oldValue = JsonConvert.SerializeObject(await _context.PartnerGiveOuts.FirstOrDefaultAsync(x => x.PartnerGiveOutId == partnerGiveOut.PartnerGiveOutId));
+            var newValue = JsonConvert.SerializeObject(partnerGiveOut);
+
+
+            if (await _approvalService.UpdateApprovalQueue(partnerGiveOut.GetType().Name, "Partner Hamper", UpdateAction.Update, oldValue, newValue, user.UserName))
+            {
+                ViewBag.Approval = "Your changes have been forwarded for approval";
+            }
+            else
+            {
+                ViewBag.Message = "Unable to save changes. " +
+                    "Try again, and if the problem persists, " +
+                    "see your system administrator.";
+            }
+
+            ViewData["PartnerId"] = new SelectList(_context.Partners, "PartnerId", "Name", partnerGiveOut.PartnerId);
+
+            return View(partnerGiveOutView);
+        }
+
+        public async Task<IActionResult> VolunteerGiveOutList()
+        {
+            return View(await _context.VolunteerGiveOuts.Include(x => x.User).OrderByDescending(x => x.VolunteerGiveOutId).ToListAsync());
+        }
+
+        public IActionResult AddVolunteerGiveOut()
+        {
+            return View( new VolunteerGiveOutViewModel() { CollectionDate = DateTime.Now});
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddVolunteerGiveOut([Bind("Email,CollectionDate,Weight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight")] VolunteerGiveOutViewModel volunteerGiveOutView)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var totalWeight = volunteerGiveOutView.NonPerishablesWeight + volunteerGiveOutView.PerishablesWeight + volunteerGiveOutView.FrozenWeight + volunteerGiveOutView.NonFoodWeight;
+
+            VolunteerGiveOut volunteerGiveOut = new()
+            {
+                Email = volunteerGiveOutView.Email,
+                CollectionDate = volunteerGiveOutView.CollectionDate,
+                Weight = (double)totalWeight,
+                NonPerishables = volunteerGiveOutView.NonPerishables,
+                NonPerishablesWeight = volunteerGiveOutView.NonPerishablesWeight,
+                Perishables = volunteerGiveOutView.Perishables,
+                PerishablesWeight = volunteerGiveOutView.PerishablesWeight,
+                Frozen = volunteerGiveOutView.Frozen,
+                FrozenWeight = volunteerGiveOutView.FrozenWeight,
+                NonFood = volunteerGiveOutView.NonFood,
+                NonFoodWeight = volunteerGiveOutView.NonFoodWeight,
+                AddedBy = user.UserName,
+                DateAdded = DateTime.Now
+            };
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    await _context.AddAsync(volunteerGiveOut);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(VolunteerGiveOutList));
+                }
+                else
+                {
+                    ViewBag.Message = "Unable to save changes. " +
+                        "Try again, and if the problem persists, " +
+                        "see your system administrator.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, ex, $"An error has occurred when trying to write into {volunteerGiveOut.GetType().Name} table");
+            }
+
+            ViewData["Email"] = new SelectList(_userManager.Users, "Email", "FullName");
+
+            return View(volunteerGiveOutView);
+        }
+
+        public async Task<IActionResult> EditVolunteerGiveOut(string id)
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var volunteerGiveOut = await _context.VolunteerGiveOuts.Include(x => x.User).FirstOrDefaultAsync(x => x.VolunteerGiveOutId == num);
+            if (volunteerGiveOut == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            VolunteerGiveOutViewModel volunteerGiveOutView = new()
+            {
+                VolunteerGiveOutId = volunteerGiveOut.VolunteerGiveOutId,
+                Email = volunteerGiveOut.Email,
+                CollectionDate = volunteerGiveOut.CollectionDate,
+                Weight = volunteerGiveOut.Weight,
+                NonPerishables = volunteerGiveOut.NonPerishables,
+                NonPerishablesWeight = volunteerGiveOut.NonPerishablesWeight,
+                Perishables = volunteerGiveOut.Perishables,
+                PerishablesWeight = volunteerGiveOut.PerishablesWeight,
+                Frozen = volunteerGiveOut.Frozen,
+                FrozenWeight = volunteerGiveOut.FrozenWeight,
+                NonFood = volunteerGiveOut.NonFood,
+                NonFoodWeight = volunteerGiveOut.NonFoodWeight
+            };
+
+            ViewData["Email"] = new SelectList(_userManager.Users, "Email", "FullName", volunteerGiveOut.Email);
+
+            return View(volunteerGiveOutView);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditVolunteerGiveOut(string id, [Bind("VolunteerGiveOutId,Email,CollectionDate,Weight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight")] VolunteerGiveOutViewModel volunteerGiveOutView)
+        {
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            if (num != volunteerGiveOutView.VolunteerGiveOutId)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            var totalWeight = volunteerGiveOutView.NonPerishablesWeight + volunteerGiveOutView.PerishablesWeight + volunteerGiveOutView.FrozenWeight + volunteerGiveOutView.NonFoodWeight;
+
+            VolunteerGiveOut volunteerGiveOut = new()
+            {
+                VolunteerGiveOutId = volunteerGiveOutView.VolunteerGiveOutId,
+                Email = volunteerGiveOutView.Email,
+                CollectionDate = volunteerGiveOutView.CollectionDate,
+                Weight = (double)totalWeight,
+                NonPerishables = volunteerGiveOutView.NonPerishables,
+                NonPerishablesWeight = volunteerGiveOutView.NonPerishablesWeight,
+                Perishables = volunteerGiveOutView.Perishables,
+                PerishablesWeight = volunteerGiveOutView.PerishablesWeight,
+                Frozen = volunteerGiveOutView.Frozen,
+                FrozenWeight = volunteerGiveOutView.FrozenWeight,
+                NonFood = volunteerGiveOutView.NonFood,
+                NonFoodWeight = volunteerGiveOutView.NonFoodWeight,
+                UpdatedBy = user.UserName,
+                DateUpdated = DateTime.Now
+            };
+
+            var oldValue = JsonConvert.SerializeObject(await _context.VolunteerGiveOuts.FirstOrDefaultAsync(x => x.VolunteerGiveOutId == volunteerGiveOut.VolunteerGiveOutId));
+            var newValue = JsonConvert.SerializeObject(volunteerGiveOut);
+
+            if (await _approvalService.UpdateApprovalQueue(volunteerGiveOut.GetType().Name, "Volunteer Hamper", UpdateAction.Update, oldValue, newValue, user.UserName))
+            {
+                ViewBag.Approval = "Your changes have been forwarded for approval";
+            }
+            else
+            {
+                ViewBag.Message = "Unable to save changes. " +
+                    "Try again, and if the problem persists, " +
+                    "see your system administrator.";
+            }
+
+            ViewData["Email"] = new SelectList(_userManager.Users, "Email", "FullName", volunteerGiveOut.Email);
+
+            return View(volunteerGiveOutView);
+        }
+
+        public async Task<IActionResult> WastesList()
+        {
+            return View(await _context.Wastes.ToListAsync());
+        }
+
+        public IActionResult AddWaste()
+        {
+            return View( new WasteViewModel() { Date = DateTime.Today});
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddWaste([Bind("Date,Weight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight,Note")] WasteViewModel wasteView)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var totalWeight = wasteView.NonPerishablesWeight + wasteView.PerishablesWeight + wasteView.FrozenWeight + wasteView.NonFoodWeight;
+
+            Waste waste = new()
+            {
+                Date = wasteView.Date,
+                Weight = (double)totalWeight,
+                NonPerishables = wasteView.NonPerishables,
+                NonPerishablesWeight = wasteView.NonPerishablesWeight,
+                Perishables = wasteView.Perishables,
+                PerishablesWeight = wasteView.PerishablesWeight,
+                Frozen = wasteView.Frozen,
+                FrozenWeight = wasteView.FrozenWeight,
+                NonFood = wasteView.NonFood,
+                NonFoodWeight = wasteView.NonFoodWeight,
+                Note = wasteView.Note,                
+                AddedBy = user.UserName,
+                DateAdded = DateTime.Now
+            };
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    await _context.AddAsync(wasteView);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(WastesList));
+                }
+                else
+                {
+                    ViewBag.Message = "Unable to save changes. " +
+                        "Try again, and if the problem persists, " +
+                        "see your system administrator.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, ex, $"An error has occurred when trying to write into {waste.GetType().Name} table");
+            }
+
+            return View(wasteView);
+        }
+
+        public async Task<IActionResult> EditWaste(string id)
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var waste = await _context.Wastes.FirstOrDefaultAsync(x => x.WasteId == num);
+            if (waste == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            WasteViewModel wasteView = new()
+            {
+                WasteId = waste.WasteId,
+                Date = waste.Date,
+                Weight = waste.Weight,
+                NonPerishables = waste.NonPerishables,
+                NonPerishablesWeight = waste.NonPerishablesWeight,
+                Perishables = waste.Perishables,
+                PerishablesWeight = waste.PerishablesWeight,
+                Frozen = waste.Frozen,
+                FrozenWeight = waste.FrozenWeight,
+                NonFood = waste.NonFood,
+                NonFoodWeight = waste.NonFoodWeight,
+                Note = waste.Note,
+            };
+
+            return View(wasteView);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditWaste(string id, [Bind("WasteId,Date,Weight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight,Note")] WasteViewModel wasteView)
+        {
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            if (num != wasteView.WasteId)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            var totalWeight = wasteView.NonPerishablesWeight + wasteView.PerishablesWeight + wasteView.FrozenWeight + wasteView.NonFoodWeight;
+
+            Waste waste = new()
+            {
+                WasteId = wasteView.WasteId,
+                Date = wasteView.Date,
+                Weight = (double)totalWeight,
+                NonPerishables = wasteView.NonPerishables,
+                NonPerishablesWeight = wasteView.NonPerishablesWeight,
+                Perishables = wasteView.Perishables,
+                PerishablesWeight = wasteView.PerishablesWeight,
+                Frozen = wasteView.Frozen,
+                FrozenWeight = wasteView.FrozenWeight,
+                NonFood = wasteView.NonFood,
+                NonFoodWeight = wasteView.NonFoodWeight,
+                Note = wasteView.Note,
+                UpdatedBy = user.UserName,
+                DateUpdated = DateTime.Now
+            };
+
+            var oldValue = JsonConvert.SerializeObject(await _context.Wastes.FirstOrDefaultAsync(x => x.WasteId == waste.WasteId));
+            var newValue = JsonConvert.SerializeObject(waste);
+
+            if (await _approvalService.UpdateApprovalQueue(waste.GetType().Name, "Waste Item", UpdateAction.Update, oldValue, newValue, user.UserName))
+            {
+                ViewBag.Approval = "Your changes have been forwarded for approval";
+            }
+            else
+            {
+                ViewBag.Message = "Unable to save changes. " +
+                    "Try again, and if the problem persists, " +
+                    "see your system administrator.";
+            }
+
+            return View(wasteView);
+        }
+
+        public async Task<IActionResult> ItemsForCollection()
+        {
+            var families = await _context.Hampers.Include(x => x.Family).Where(x => x.CollectionDate == DateTime.Today && !x.Collected).OrderBy(x => x.CollectionTime).ToListAsync();
+            var partners = await _context.PartnerGiveOuts.Include(x => x.Partner).Where(x => x.CollectionDate == DateTime.Today && !x.Collected).OrderBy(x => x.CollectionTime).ToListAsync();
+
+            List<DailyCollection> dailyCollections = [];
+
+            foreach (var f in families)
+            {
+                DailyCollection collection = new() { Id = f.FamilyId, Name = f.Family.FullName, CollectionDate = f.CollectionDate, CollectionTime = f.CollectionTime, Weight = f.Weight, Collected = f.Collected, Source = "Family" };
+
+                dailyCollections.Add(collection);
+            }
+
+            foreach (var p in partners)
+            {
+                DailyCollection collection = new() { Id = p.PartnerId, Name = p.Partner.Name, CollectionDate = p.CollectionDate, CollectionTime = p.CollectionTime, Weight = p.Weight, Collected = p.Collected, Source = "Family" };
+
+                dailyCollections.Add(collection);
+            }
+
+            return View(dailyCollections.OrderBy(x => x.CollectionTime));
+        }
+
+        public async Task<IActionResult> FamilyCollected(string id)
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var hamper = await _context.Hampers.FirstOrDefaultAsync(x => x.HamperId == num);
+            if (hamper == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            if (!hamper.Collected)
+            {
+                hamper.Collected = true;
+                hamper.DateCollected = DateTime.Now;
+            }
+
+            try
+            {
+                _context.Update(hamper);
+                await _context.SaveChangesAsync();               
+            }
+            catch (Exception ex)
+            {          
+                _logger.Log(LogLevel.Error, ex, "An error has occurred fetching item");
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });         
+            }
+
+            return RedirectToAction(nameof(ItemsForCollection));
+        }
+
+        public async Task<IActionResult> PartnerCollected(string id)
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var partnerGiveOut = await _context.PartnerGiveOuts.FirstOrDefaultAsync(x => x.PartnerGiveOutId == num);
+            if (partnerGiveOut == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            if (!partnerGiveOut.Collected)
+            {
+                partnerGiveOut.Collected = true;
+                partnerGiveOut.DateCollected = DateTime.Now;
+            }
+
+            try
+            {
+                _context.Update(partnerGiveOut);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+
+                _logger.Log(LogLevel.Error, ex, "An error has occurred fetching item");
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            return RedirectToAction(nameof(ItemsForCollection));
+        }
+
+        public async Task<IActionResult> PendingApprovals()
+        {
+            return View(await _context.Approvals.OrderByDescending(x => x.ApprovalQueueId).ToListAsync());
+        }
+
+        public async Task<IActionResult> ItemsForApproval()
+        {
+            return View(await _context.Approvals.OrderByDescending(x => x.ApprovalQueueId).ToListAsync());
+        }   
+
+        public async Task<IActionResult> ItemsForApproval(DateRangeViewModel dateRangeView)
+        {
+            return View(await _context.Approvals.Where(x => x.ChangeDate >= dateRangeView.StartDate && x.ChangeDate >= dateRangeView.EndDate).OrderByDescending(x => x.ApprovalQueueId).ToListAsync());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveChange(string id)
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var approvalQueue = await _context.Approvals.FirstOrDefaultAsync(x => x.ApprovalQueueId == num);
+            if (approvalQueue == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            approvalQueue.Status = ApprovalStatus.Approved;
+            approvalQueue.ApprovedBy = user.UserName;
+            approvalQueue.ApprovedDate = DateTime.Now;
+
+            _context.Update(approvalQueue);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(ItemsForApproval)); ;
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectChange(string id, [Bind("RejectionReason")] ApprovalQueue approval)
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var approvalQueue = await _context.Approvals.FirstOrDefaultAsync(x => x.ApprovalQueueId == num);
+            if (approvalQueue == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            approvalQueue.Status = ApprovalStatus.Declined;
+            approvalQueue.RejectedBy = user.UserName;
+            approvalQueue.RejectionReason = approval.RejectionReason;
+            approvalQueue.RejectionDate = DateTime.Now;
+
+            _context.Update(approvalQueue);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(ItemsForApproval)); ;
+        }
+
+        public async Task<IActionResult> ApprovalDetails(string id) 
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var approvalQueue = await _context.Approvals.FirstOrDefaultAsync(x => x.ApprovalQueueId == num);
+            if (approvalQueue == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            Type classType = Type.GetType(approvalQueue.TableName);
+
+            object classObj = Activator.CreateInstance(classType);
+
+            var newClass = System.Reflection.Assembly.GetAssembly(classType).CreateInstance(approvalQueue.TableName);
+
+            //var oldvalue = JsonConvert.DeserializeObject<newClass> (approvalQueue.OldValue);
+
+            switch (approvalQueue.TableName)
+            {
+                case "Donor":
+                    Donor donorOld = JsonConvert.DeserializeObject<Donor>(approvalQueue.OldValue);
+                    Donor donorNew = JsonConvert.DeserializeObject<Donor>(approvalQueue.NewValue);
+                    break;
+                case "Family":
+                    Family familyOld = JsonConvert.DeserializeObject<Family>(approvalQueue.OldValue);
+                    Family familyNew = JsonConvert.DeserializeObject<Family>(approvalQueue.NewValue);
+                    break;
+                case "Hamper":
+                    Hamper hamperOld = JsonConvert.DeserializeObject<Hamper>(approvalQueue.OldValue);
+                    Hamper hamperNew = JsonConvert.DeserializeObject<Hamper>(approvalQueue.NewValue);
+                    break;
+                case "InwardItem":
+                    InwardItem inwardOld = JsonConvert.DeserializeObject<InwardItem>(approvalQueue.OldValue);
+                    InwardItem inwardNew = JsonConvert.DeserializeObject<InwardItem>(approvalQueue.NewValue);
+                    break;
+                case "Partner":
+                    Partner partnerOld = JsonConvert.DeserializeObject<Partner>(approvalQueue.OldValue);
+                    Partner partnerNew = JsonConvert.DeserializeObject<Partner>(approvalQueue.NewValue);
+                    break;
+            }
+
+            return View(approvalQueue);
+        }
+
+        private bool InwardItemExists(int id)
+        {
+            return _context.InwardItems.Any(x => x.InwardItemId == id);
+        }
+
+        private bool HamperExists(int id)
+        {
+            return _context.Hampers.Any(x => x.HamperId == id);
+        }
+
+        private bool PartnerGiveOutExists(int id)
+        {
+            return _context.PartnerGiveOuts.Any(x => x.PartnerGiveOutId == id);
+        }
+
+        private bool VolunteerGiveOutExists(int id)
+        {
+            return _context.VolunteerGiveOuts.Any(x => x.VolunteerGiveOutId == id);
+        }
+
+        private bool WasteExists(int id)
+        {
+            return _context.Wastes.Any(x => x.WasteId == id);
+        }        
+
+        private async Task<(string filePath, string thumbFilePath, string message)> ProcessFile(IFormFile file, string mainDirectory, string subDirectory)
+        {
+            string filePath = string.Empty;
+            string message = string.Empty;
+            string thumbnailPath = string.Empty;
+
+            string[] allowedExtensions = ["jpeg", "jpg", "png"];
+
+            if (file != null)
+            {
+                (filePath, message) = await _fileService.SaveFile(file, mainDirectory, subDirectory, allowedExtensions);
+
+                thumbnailPath = _fileService.FileResize(file.FileName, filePath, 100, 75);
+            }
+
+            return (filePath, thumbnailPath, message);
+        }
+    }
+}

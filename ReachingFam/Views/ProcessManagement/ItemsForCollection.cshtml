@@ -1,0 +1,77 @@
+﻿@model IEnumerable<DailyCollection>
+
+@inject CustomIDataProtection protector;
+@{
+    ViewData["Title"] = "Items for Collection";
+    int i = 1;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-title-box">
+                <div class="float-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Analytics</a></li>
+                        <li class="breadcrumb-item active">Items for Collection</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Items for Collection -- @DateTime.Today.ToString("MMMM dd, yyyy")</h4>
+            </div>
+            <!--end page-title-box-->
+        </div>
+        <!--end col-->
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="datatable_1">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Collection Date</th>
+                                    <th>Collection Time</th>
+                                    <th>Weight</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@(i++)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.CollectionDate)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.CollectionTime)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Weight)</td>
+                                        @if (item.Source == "Family")
+                                        {
+                                            <td>
+                                                <a asp-action="FamilyCollected" asp-route-id="@protector.Encode(item.Id.ToString())"><i class="las la-pen text-secondary font-16"></i></a>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td>
+                                                <a asp-action="PartnerCollected" asp-route-id="@protector.Encode(item.Id.ToString())"><i class="las la-pen text-secondary font-16"></i></a>
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-Footer">
+                    <div class="col">
+                        <a class="btn btn-outline-dark btn-sm px-4 " asp-controller="Home" asp-action="Index"><i class="fas fa-chevron-left"></i> Back</a>
+                    </div><!--end col-->
+                </div>
+            </div>
+        </div> <!-- end col -->
+    </div> <!-- end row -->
+</div>

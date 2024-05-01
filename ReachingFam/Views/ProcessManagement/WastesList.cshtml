@@ -1,0 +1,72 @@
+﻿@model IEnumerable<Waste>
+
+@inject CustomIDataProtection protector;
+@{
+    ViewData["Title"] = "Waste Items List";
+    int i = 1;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-title-box">
+                <div class="float-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Analytics</a></li>
+                        <li class="breadcrumb-item active">Wastes Items</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Waste Items</h4>
+            </div>
+            <!--end page-title-box-->
+        </div>
+        <!--end col-->
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="col">
+                        <a class="btn btn-soft-primary btn-sm px-4" asp-action="AddWaste"><i class="mdi mdi-plus me-2"></i>Add New</a>
+                    </div>
+                </div><!--end card-header-->
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="datatable_1">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>@Html.DisplayNameFor(model => model.Date)</th>
+                                    <th>@Html.DisplayNameFor(model => model.Weight)</th>
+                                    <th>@Html.DisplayNameFor(model => model.Note)</th>
+                                    <th>@Html.DisplayNameFor(model => model.DateAdded)</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@(i++)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Date)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Weight)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Note)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.DateAdded)</td>
+                                        <td>
+                                            <a asp-action="EditWaste" asp-route-id="@protector.Encode(item.WasteId.ToString())"><i class="las la-pen text-secondary font-16"></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-Footer">
+                    <div class="col">
+                        <a class="btn btn-outline-dark btn-sm px-4 " asp-controller="Home" asp-action="Index"><i class="fas fa-chevron-left"></i> Back</a>
+                    </div><!--end col-->
+                </div>
+            </div>
+        </div> <!-- end col -->
+    </div> <!-- end row -->
+</div>

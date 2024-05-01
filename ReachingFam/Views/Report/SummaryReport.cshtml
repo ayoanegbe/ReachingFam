@@ -1,0 +1,142 @@
+﻿@model FinalReportViewModel
+
+@{
+    ViewData["Title"] = "Summary Report";
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-title-box">
+                <div class="float-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Analytics</a></li>
+                        <li class="breadcrumb-item active">Summary Report</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Summary Report</h4>
+            </div>
+            <!--end page-title-box-->
+        </div>
+        <!--end col-->
+    </div>
+    <div class="row d-flex ">
+        <div class="col-lg-11">
+            <div class="float-end d-print-none mt-2 mt-md-0">
+                <form asp-controller="Report" asp-action="SummaryReport" method="get">
+                    <div class="col-auto input-group justify-content-end">
+                        <select class="btn btn-sm btn-outline-light" asp-for="Period" asp-items="@Html.GetEnumSelectList<AnalyticPeriod>()">
+                        </select>
+                        <button class="btn btn-sm btn-primary" type="submit">GO!</button>
+                    </div><!--end col-->
+                </form>
+            </div>
+        </div><!--end col-->
+    </div><!--end row-->
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card">
+                <div class="card-body invoice-head">
+                    <div class="row">
+                        <div class="col-md-6 align-self-center">
+                            <img src="~/images/rff-logo.png" alt="logo-small" class="logo-sm me-1" height="24">
+                            <img src="~/images/rff-logo-dark.png" alt="" class="logo-lg brand-dark" height="30">
+                            <h3 class="mt-2 mb-0">Summary Report</h3>
+                        </div><!--end col-->
+                    </div><!--end row-->
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-3 d-flex justify-content-md-between">
+                        <div class="col-md-3 d-print-flex">
+                            <div class="">
+                                <h6 class="mb-0"><b>Report Date :</b> @DateTime.Today.ToString("dd-MMM-yyyy")</h6>
+                            </div>
+                        </div><!--end col-->
+
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="table-responsive project-invoice">
+                                <table class="table table-bordered mb-0">
+                                    <thead class="thead-light">
+
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>@Html.DisplayNameFor(model => model.WeightIn)</th>
+                                            <th>@Html.DisplayNameFor(model => model.Donors)</th>
+                                            <th>@Html.DisplayNameFor(model => model.FamilyWeight)</th>
+                                            <th>@Html.DisplayNameFor(model => model.Families)</th>
+                                            <th>@Html.DisplayNameFor(model => model.Seniors)</th>
+                                            <th>@Html.DisplayNameFor(model => model.Adults)</th>
+                                            <th>@Html.DisplayNameFor(model => model.Children)</th>
+                                            <th>@Html.DisplayNameFor(model => model.PartnerWeight)</th>
+                                            <th>@Html.DisplayNameFor(model => model.Partners)</th>
+                                            <th>@Html.DisplayNameFor(model => model.VolunteerWeight)</th>
+                                            <th>@Html.DisplayNameFor(model => model.Volunteers)</th>
+                                            <th>@Html.DisplayNameFor(model => model.Hours)</th>
+                                            <th>@Html.DisplayNameFor(model => model.Waste)</th>
+                                            <th>@Html.DisplayNameFor(model => model.WeightOut)</th>
+                                        </tr><!--end tr-->
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.FinalReports)
+                                        {
+                                            <tr>
+                                                <td>@Html.DisplayFor(modelItem => item.Date)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.WeightIn)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Donors)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.FamilyWeight)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Families)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Seniors)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Adults)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Children)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.PartnerWeight)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Partners)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.VolunteerWeight)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Volunteers)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Hours)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.Waste)</td>
+                                                <td>@Html.DisplayFor(modelItem => item.WeightOut)</td>
+                                            </tr>
+
+                                            <!--end tr-->
+                                        }
+                                        <tr>
+                                            <td class="border-0 font-12 text-dark">Total</td>
+                                            <td class="border-0 font-12 text-dark">@Model.WeightIn</td>
+                                            <td class="border-0 font-12 text-dark"></td>
+                                            <td class="border-0 font-12 text-dark">@Model.FamilyWeight</td>
+                                            <td class="border-0 font-12 text-dark">@Model.Families</td>
+                                            <td class="border-0 font-12 text-dark">@Model.Seniors</td>
+                                            <td class="border-0 font-12 text-dark">@Model.Adults</td>
+                                            <td class="border-0 font-12 text-dark">@Model.Children</td>
+                                            <td class="border-0 font-12 text-dark">@Model.PartnerWeight</td>
+                                            <td class="border-0 font-12 text-dark">@Model.Partners</td>
+                                            <td class="border-0 font-12 text-dark">@Model.VolunteerWeight</td>
+                                            <td class="border-0 font-12 text-dark">@Model.Volunteers</td>
+                                            <td class="border-0 font-12 text-dark">@Model.Hours</td>
+                                            <td class="border-0 font-12 text-dark">@Model.Waste</td>
+                                            <td class="border-0 font-12 text-dark">@Model.WeightOut</td>
+                                        </tr><!--end tr-->
+                                    </tbody>
+                                </table><!--end table-->
+                            </div>  <!--end /div-->
+                        </div>  <!--end col-->
+                    </div><!--end row-->
+                    <hr>
+                    <div class="row d-flex ">
+                        <div class="col-lg-12">
+                            <div class="float-end d-print-none mt-2 mt-md-0">
+                                <a href="javascript:window.print()" class="btn btn-de-info btn-sm">Print</a>
+                                <button type="button" onclick="tableToCSV()" class="btn btn-de-secondary btn-sm">
+                                    Download
+                                </button>
+                                <a class="btn btn-de-danger btn-sm" asp-controller="Home" asp-action="Index">Cancel</a>
+                            </div>
+                        </div><!--end col-->
+                    </div><!--end row-->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,198 @@
+﻿@inject UserManager<ApplicationUser> UserManager
+
+@{
+    
+    var user = await UserManager.GetUserAsync(User);
+    var roles = new List<string> { "Super Administrator", "Administrator"};
+}
+
+<div class="leftbar-tab-menu">
+    <div class="main-icon-menu">
+        <a asp-controller="Home" asp-action="Index" class="logo logo-metrica d-block text-center">
+            <span>
+                <img src="~/images/rff-logo.png" alt="logo-small" class="logo-sm">
+            </span>
+        </a>
+        <div class="main-icon-menu-body">
+            <div class="position-reletive h-100" data-simplebar style="overflow-x: hidden;">
+                <ul class="nav nav-tabs" role="tablist" id="tab-menu">
+                    <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="right" title="Dashboard" data-bs-trigger="hover">
+                        <a href="#MetricaDashboard" id="dashboard-tab" class="nav-link">
+                            <i class="ti ti-smart-home menu-icon"></i>
+                        </a><!--end nav-link-->
+                    </li><!--end nav-item-->
+                    <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="right" title="Setup" data-bs-trigger="hover">
+                        <a href="#MetricaApps" id="apps-tab" class="nav-link">
+                            <i class="ti ti-apps menu-icon"></i>
+                        </a><!--end nav-link-->
+                    </li><!--end nav-item-->                   
+                    <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="right" title="Process Management" data-bs-trigger="hover">
+                        <a href="#MetricaPages" id="pages-tab" class="nav-link">
+                            <i class="ti ti-building-warehouse menu-icon"></i>
+                        </a><!--end nav-link-->
+                    </li><!--end nav-item-->
+                    <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="right" title="Reports" data-bs-trigger="hover">
+                        <a href="#MetricaUikit" id="uikit-tab" class="nav-link">
+                            <i class="ti ti-files menu-icon"></i>
+                        </a><!--end nav-link-->
+                    </li><!--end nav-item-->
+                    <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="right" title="User Management" data-bs-trigger="hover">
+                        <a href="#MetricaAuthentication" id="authentication-tab" class="nav-link">
+                            <i class="ti ti-shield-lock menu-icon"></i>
+                        </a><!--end nav-link-->
+                    </li><!--end nav-item-->
+                </ul><!--end nav-->
+            </div><!--end /div-->
+        </div><!--end main-icon-menu-body-->
+        <div class="pro-metrica-end">
+            <a href="#" class="profile">
+                <img src="~/images/users/user-vector.png" alt="profile-user" class="rounded-circle thumb-sm">
+            </a>
+        </div><!--end pro-metrica-end-->
+    </div>
+    <!--end main-icon-menu-->
+
+    <div class="main-menu-inner">
+        <!-- LOGO -->
+        <div class="topbar-left">
+            <a asp-controller="Home" asp-action="Index" class="logo">
+                <span>
+                    <img src="~/images/rff-logo-dark.png" alt=""  height="40">
+                   @*  <img src="~/images/rff-logo-light.png" alt="logo-large" height="75"> *@
+                </span>
+            </a><!--end logo-->
+        </div><!--end topbar-left-->
+        <!--end logo-->
+        <div class="menu-body navbar-vertical tab-content" data-simplebar>
+            <div id="MetricaDashboard" class="main-icon-menu-pane tab-pane" role="tabpanel"
+                aria-labelledby="dasboard-tab">
+                <div class="title-box">
+                    <h6 class="menu-title">Dashboard</h6>
+                </div>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Home" asp-action="Index">Analytics</a>
+                    </li><!--end nav-item-->                    
+                </ul><!--end nav-->
+            </div><!-- end Dashboards -->
+
+            <div id="MetricaApps" class="main-icon-menu-pane tab-pane" role="tabpanel"
+                aria-labelledby="apps-tab">
+                <div class="title-box">
+                    <h6 class="menu-title">Setup</h6>
+                </div>
+
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Setup" asp-action="ListDonors">Donors</a>
+                    </li><!--end nav-item-->
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Setup" asp-action="ListFamilies">Families</a>
+                    </li><!--end nav-item-->
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Setup" asp-action="ListPartners">Partners</a>
+                    </li><!--end nav-item-->
+                </ul><!--end nav-->
+            </div><!-- end Crypto -->
+
+            <div id="MetricaPages" class="main-icon-menu-pane tab-pane" role="tabpanel"
+                 aria-labelledby="pages-tab">
+                <div class="title-box">
+                    <h6 class="menu-title">Process Management</h6>
+                </div>
+
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="ProcessManagement" asp-action="InwardItemsList">Inward Items</a>
+                    </li><!--end nav-item-->
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="ProcessManagement" asp-action="FamilyHamperList">Families Hampers</a>
+                    </li><!--end nav-item-->
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="ProcessManagement" asp-action="PartnerGiveOutList">Partners Hampers</a>
+                    </li><!--end nav-item-->
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="ProcessManagement" asp-action="VolunteerGiveOutList">Volunteers Hampers</a>
+                    </li><!--end nav-item-->
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="ProcessManagement" asp-action="ItemsForCollection">Items For Collection</a>
+                    </li><!--end nav-item-->
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="ProcessManagement" asp-action="WastesList">Waste Management</a>
+                    </li><!--end nav-item-->
+                </ul><!--end nav-->
+
+                <div class="title-box">
+                    <h6 class="menu-title">Gallery</h6>
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="ProcessManagement" asp-action="InwardItemsList">Inward Items</a>
+                    </li>
+                </ul>
+            </div><!-- end Crypto -->
+
+            <div id="MetricaUikit" class="main-icon-menu-pane tab-pane" role="tabpanel" aria-labelledby="pages-tab">
+                <div class="title-box">
+                    <h6 class="menu-title">Reports</h6>
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Report" asp-action="HampersReport">Family Hampers</a>
+                    </li><!--end nav-item-->
+                </ul>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Report" asp-action="SummaryReport" asp-route-Period="@AnalyticPeriod.ThisMonth">Summary Report</a>
+                    </li><!--end nav-item-->
+                </ul>
+            </div>
+
+            @if (await UserManager.IsInRoleAsync(user, "Super Administrator") || await UserManager.IsInRoleAsync(user, "Administrator"))
+            {
+                <div id="MetricaAuthentication" class="main-icon-menu-pane tab-pane" role="tabpanel"
+                    aria-labelledby="authentication-tab">
+                    <div class="title-box">
+                        <h6 class="menu-title">User Management</h6>
+                    </div>
+                    @if (await UserManager.IsInRoleAsync(user, "Super Administrator"))
+                    {
+                        <ul class="nav flex-column">
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="Register" asp-route-source="superAdmin">Register</a>
+                            </li><!--end nav-item-->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="GetAllUsers">Users List</a>
+                            </li><!--end nav-item-->
+                            
+                        </ul>
+
+                        <!--end nav-->
+                    }
+                    else
+                    {
+                        <ul class="nav flex-column">
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="Register" asp-route-source="admin">Register</a>
+                            </li><!--end nav-item-->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="UserList">Users List</a>
+                            </li><!--end nav-item-->
+
+                        </ul>
+
+                        <!--end nav-->
+                    }
+
+                </div><!-- end Authentication-->
+            }
+
+            
+        </div>
+        <!--end menu-body-->
+    </div><!-- end main-menu-inner-->
+</div>
+        

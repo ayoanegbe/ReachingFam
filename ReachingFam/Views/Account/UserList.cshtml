@@ -1,0 +1,80 @@
+﻿
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var users = UserManager.Users.ToList();
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-title-box">
+                <div class="float-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a asp-action="Index" asp-controller="Home">Analytics</a>
+                        </li><!--end nav-item-->
+                        <li class="breadcrumb-item active">Users</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Users</h4>
+            </div><!--end page-title-box-->
+        </div><!--end col-->
+
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <header class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h4 class="card-title">Users List</h4>
+                        </div><!--end col-->
+                    </div>  <!--end row-->
+                </header>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="datatable_1">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Phone</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in users)
+                                {
+                                    var role = await UserManager.GetRolesAsync(user);
+                                    string userRole = role.FirstOrDefault();
+                                    @if (!userRole.Equals("Super Administrator"))
+                                    {
+                                        <tr>
+                                            <td>@user.FullName</td>
+                                            <td>@user.UserName</td>
+                                            <td>@role.FirstOrDefault()</td>
+                                            <td>@user.Phone</td>
+                                            <td><span class="badge @(user.IsActive ? "badge-soft-success" : "badge-soft-danger")">@(user.IsActive ? "Active" : "Deactivated")</span></td>
+                                            <td>
+                                                <a asp-controller="Account" asp-action="DisableUser" asp-route-userName="@user.UserName" class="on-default edit-row"><i class="fa fa-pencil-alt" data-toggle="m-tooltip" title="@(user.IsActive ? "Disable this user" : "Enable this user")"></i></a>
+                                            </td>
+
+                                        </tr>
+                                    }
+                                    
+
+                                }
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

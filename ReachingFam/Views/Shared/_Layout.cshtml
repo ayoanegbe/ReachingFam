@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <title>@ViewData["Title"] - Reaching Families</title>
+    <meta content="Ayo Anegbe" name="author" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="~/images/favicon.ico">
+
+    <link href="~/libs/simple-datatables/style.css" rel="stylesheet" type="text/css" />
+    <link href="~/libs/mobius1-selectr/selectr.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/libs/huebee/huebee.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- App css -->
+    <link href="~/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/css/icons.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/css/app.min.css" rel="stylesheet" type="text/css" />
+</head>
+<body id="body">
+
+    @await Html.PartialAsync("_LeftBarMenuPartial")
+
+    @await Html.PartialAsync("_TopBarPartial")
+
+    <div class="page-wrapper">
+
+        <div class="page-content-tab">
+
+            @RenderBody()
+
+            <footer class="footer text-center text-sm-start">
+                &copy; <script>
+                            document.write(new Date().getFullYear())
+                </script> Reaching Families Food Bank.
+            </footer>
+        </div>
+         
+    </div>
+
+    <script src="~/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/libs/simplebar/simplebar.min.js"></script>
+    <script src="~/libs/feather-icons/feather.min.js"></script>
+
+    <script src="~/libs/mobius1-selectr/selectr.min.js"></script>
+    <script src="~/libs/huebee/huebee.pkgd.min.js"></script>
+
+    <script src="~/lib/cryptography/aes.js"></script>   
+
+    <script src="~/libs/simple-datatables/umd/simple-datatables.js"></script>
+    <script src="~/js/pages/datatable.init.js"></script>
+
+    <script src="~/libs/apexcharts/apexcharts.min.js"></script>
+    <script src="~/js/pages/analytics-index.init.js"></script>
+
+    <script src="~/js/pages/forms-advanced.js"></script>
+    <script src="~/js/pages/form-validation.js"></script>
+
+    <!-- App js -->
+    <script src="~/js/app.js"></script>
+    <script src="~/js/working_data.js"></script>
+    <script src="~/js/app_common.js"></script>
+    @* <script src="~/js/food_dist.js"></script> *@
+
+    <script>
+
+        
+
+
+        // const items = ['-', '.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+        // var number_input = document.getElementById('number_input');
+
+        // number_input.addEventListener('keypress', function (evt) {
+
+        //     if (!items.includes(evt.key)) {
+        //         evt.preventDefault();
+        //     }
+        // });
+    </script>
+
+    <script>
+        
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

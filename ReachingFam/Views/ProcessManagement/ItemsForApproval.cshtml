@@ -1,0 +1,179 @@
+﻿@model IEnumerable<ApprovalQueue>
+
+@inject CustomIDataProtection protector;
+
+@{
+    ViewData["Title"] = "Items for Approval";
+    int i = 1;
+
+    ApprovalQueue approvalQueue = new();
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-title-box">
+                <div class="float-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Analytics</a></li>
+                        <li class="breadcrumb-item active">Items for Approval</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Items for Approval</h4>
+            </div>
+            <!--end page-title-box-->
+        </div>
+        <!--end col-->
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="datatable_1">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Change Date</th>
+                                    <th>Changed By</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    approvalQueue = item;
+                                    <tr>
+                                        <td>@(i++)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.ModuleName)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.ChangeDate)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.ChangedBy)</td>
+                                        <td><span class="badge @(item.Status == ApprovalStatus.Pending ? "badge-soft-warning" : (item.Status == ApprovalStatus.Approved ? "badge-soft-success" : "badge-soft-danger"))">@Html.DisplayFor(modelItem => item.Status)</span></td>
+
+                                        <td class="text-end">
+                                            <div class="dropdown d-inline-block">
+                                                <a class="dropdown-toggle arrow-none" id="dLabel11" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+                                                    <i class="las la-ellipsis-v font-20 text-muted"></i>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dLabel11">
+                                                    @if (item.Status == ApprovalStatus.Pending)
+                                                    {
+                                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#approve">Approve</a>
+                                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reject">Reject</a>
+                                                    }
+                                                    <a class="dropdown-item" href="#">View Details</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-Footer">
+                    <div class="col">
+                        <a class="btn btn-outline-dark btn-sm px-4 " asp-controller="Home" asp-action="Index"><i class="fas fa-chevron-left"></i> Back</a>
+                    </div><!--end col-->
+                </div>
+            </div>
+        </div> <!-- end col -->
+    </div> <!-- end row -->
+</div>
+
+<div class="modal fade" id="approve" tabindex="-1" role="dialog" aria-labelledby="exampleModalDefaultLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title m-0" id="exampleModalDefaultLabel">Approve Changes</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div><!--end modal-header-->
+            <form asp-action="ApproveChange" method="post">
+                <input type="hidden" asp-for="@approvalQueue.ApprovalQueueId" />
+                <div class="alert alert-warning alert-dismissible" role="alert">
+                    <strong>Are you sure you want to go ahead with this?</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <div class="col-md-12 mb-3">
+                            <label class="col-form-label" asp-for=@approvalQueue.ModuleName></label>
+                            <input asp-for=@approvalQueue.ModuleName type="text" disabled class="form-control">
+                            <span asp-validation-for=@approvalQueue.ModuleName class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-12 mb-3">
+                            <label class="col-form-label" asp-for=@approvalQueue.ChangeDate></label>
+                            <input asp-for=@approvalQueue.ChangeDate type="text" disabled class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-12 mb-3">
+                            <label class="col-form-label" asp-for=@approvalQueue.ChangedBy></label>
+                            <input asp-for=@approvalQueue.ChangedBy type="text" disabled class="form-control">
+                        </div>
+                    </div>
+                </div><!--end modal-body-->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-de-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-de-primary btn-sm">Approve</button>
+                </div><!--end modal-footer-->
+            </form>
+
+        </div><!--end modal-content-->
+    </div><!--end modal-dialog-->
+</div><!--end modal-->
+
+<div class="modal fade" id="reject" tabindex="-1" role="dialog" aria-labelledby="exampleModalDefaultLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title m-0" id="exampleModalDefaultLabel">Reject Changes</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div><!--end modal-header-->
+            <form asp-action="ApproveChange" method="post">
+                <input type="hidden" asp-for="@approvalQueue.ApprovalQueueId" />
+                <div class="alert alert-warning alert-dismissible" role="alert">
+                    <strong>Are you sure you want to go ahead with this?</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <div class="col-md-12 mb-3">
+                            <label class="col-form-label" asp-for=@approvalQueue.ModuleName></label>
+                            <input asp-for=@approvalQueue.ModuleName type="text" disabled class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-12 mb-3">
+                            <label class="col-form-label" asp-for=@approvalQueue.ChangeDate></label>
+                            <input asp-for=@approvalQueue.ChangeDate type="text" disabled class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-12 mb-3">
+                            <label class="col-form-label" asp-for=@approvalQueue.ChangedBy></label>
+                            <input asp-for=@approvalQueue.ChangedBy type="text" disabled class="form-control">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label asp-for=@approvalQueue.RejectionReason></label>
+                                <textarea class="form-control" rows="5" asp-for=@approvalQueue.RejectionReason required></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end modal-body-->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-de-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-de-primary btn-sm">Reject</button>
+                </div><!--end modal-footer-->
+            </form>
+        </div><!--end modal-content-->
+    </div><!--end modal-dialog-->
+</div><!--end modal-->

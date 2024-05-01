@@ -1,0 +1,124 @@
+﻿@model InwardItemViewModel
+
+@{
+    ViewData["Title"] = "Update Inward Item";
+}
+
+<div class="container-fluid">
+    <!-- Page-Title -->
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-title-box">
+                <div class="float-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Analytics</a></li>
+                        <li class="breadcrumb-item">
+                            <a asp-action="InwardItemsList">Inward Items</a>
+                        </li><!--end nav-item-->
+                        <li class="breadcrumb-item active">Update Inward Item</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Update Inward Item</h4>
+            </div><!--end page-title-box-->
+        </div><!--end col-->
+    </div>
+    <!-- end page title end breadcrumb -->
+    <div class="row">
+        <div class="col-12 col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="EditInwardItem" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="InwardItemId" />
+                        @if (ViewBag.Message != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible" role="alert">
+                                <strong>Oh snap!</strong> @ViewBag.Message
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+                            </div>
+                        }
+                        @if (ViewBag.Approval != null)
+                        {
+                            <div class="alert alert-success alert-dismissible" role="alert">
+                                <strong>Yay!</strong> @ViewBag.Approval
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+                            </div>
+                        }
+                        <div class="form-group row">
+                            <div class="col-md-6 mb-3">
+                                <label class="col-form-label" asp-for="DonorId"></label>
+                                <select asp-for="DonorId" asp-items="ViewBag.DonorId" class="form-control">
+                                    <option selected="selected" value="">Please Select Donor</option>
+                                </select>
+                                <span asp-validation-for="DonorId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="col-form-label" asp-for="CollectionDate"></label>
+                                <input asp-for="CollectionDate" type="date" placeholder="Collection Date" class="form-control">
+                                <span asp-validation-for="CollectionDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <hr />
+                        <div class="form-group row mb-3">
+                            <div class="form-check col-md-2 mt-2">
+                                <input asp-for=NonPerishables class="form-check-input" type="checkbox" id="chkNonPerishables" onchange="handleNonPerishables(this)">
+                                <label asp-for=NonPerishables class="form-check-label"></label>
+                            </div>
+                            <div class="col-md-4">
+                                <input asp-for="NonPerishablesWeight" type="text" asp-format="{0:n2}" placeholder="Non Perishables Weight (lbs)" class="form-control" id="NonPerishablesWeight" onkeypress="return isDecimalKey(event)" onblur="formatNonPerishablesWeight(this)" disabled style="background-color:#f7f8f9">
+                                <span asp-validation-for="NonPerishablesWeight" class="text-danger"></span>
+                            </div>
+                            <div class="form-check col-md-2 mt-2">
+                                <input asp-for=Perishables class="form-check-input" type="checkbox" id="chkPerishables" onchange="handlePerishables(this)">
+                                <label asp-for=Perishables class="form-check-label"></label>
+                            </div>
+                            <div class="col-md-4">
+                                <input asp-for="PerishablesWeight" type="text" asp-format="{0:n2}" placeholder="Perishables Weight (lbs)" class="form-control" id="PerishablesWeight" onkeypress="return isDecimalKey(event)" onblur="formatPerishablesWeight(this)" disabled style="background-color:#f7f8f9">
+                                <span asp-validation-for="PerishablesWeight" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group row mb-3">
+                            <div class="form-check col-md-2 mt-2">
+                                <input asp-for=Frozen class="form-check-input" type="checkbox" id="chkFrozen" onchange="handleFrozen(this)">
+                                <label asp-for=Frozen class="form-check-label"></label>
+                            </div>
+                            <div class="col-md-4">
+                                <input asp-for="FrozenWeight" type="text" asp-format="{0:n2}" placeholder="Frozen Weight (lbs)" class="form-control" id="FrozenWeight" onkeypress="return isDecimalKey(event)" onblur="formatFrozenWeight(this)" disabled style="background-color:#f7f8f9">
+                                <span asp-validation-for="FrozenWeight" class="text-danger"></span>
+                            </div>
+                            <div class="form-check col-md-2 mt-2">
+                                <input asp-for=NonFood class="form-check-input" type="checkbox" id="chkNonFood" onchange="handleNonFood(this)">
+                                <label asp-for=NonFood class="form-check-label"></label>
+                            </div>
+                            <div class="col-md-4">
+                                <input asp-for="NonFoodWeight" type="text" asp-format="{0:n2}" placeholder="Non Food Weight (lbs)" class="form-control" id="NonFoodWeight" onkeypress="return isDecimalKey(event)" onblur="formatNonFoodWeight(this)" disabled style="background-color:#f7f8f9">
+                                <span asp-validation-for="NonFoodWeight" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-4 mb-3">
+                                <label class="col-form-label" asp-for="TotalWeight"></label>
+                                <input asp-for="TotalWeight" type="text" asp-format="{0:n2}" class="form-control" id="TotalWeight" onblur="formatTotalWeight(this)" disabled style="background-color:#f7f8f9">
+                                <span asp-validation-for="TotalWeight" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-de-primary btn-sm text-light px-4 mt-3 mb-0">Save</button>
+                            <a class="btn btn-de-danger btn-sm text-light px-4 mt-3 mb-0" asp-action="InwardItemsList">Cancel</a>
+                        </div>
+                    </form>
+                </div> <!--end card-body-->
+            </div><!--end card-->
+        </div> <!--end col-->
+    </div><!--end row-->
+
+</div><!-- container -->
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
