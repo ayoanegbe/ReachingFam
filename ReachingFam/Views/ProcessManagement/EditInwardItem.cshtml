@@ -1,5 +1,7 @@
 ﻿@model InwardItemViewModel
 
+@inject CustomIDataProtection protector;
+
 @{
     ViewData["Title"] = "Update Inward Item";
 }
@@ -27,7 +29,7 @@
         <div class="col-12 col-lg-8 mx-auto">
             <div class="card">
                 <div class="card-body">
-                    <form asp-action="EditInwardItem" method="post">
+                    <form asp-action="EditInwardItem" asp-route-returnUrl="@protector.Encode(ViewBag.ReturnUrl)" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input type="hidden" asp-for="InwardItemId" />
                         @if (ViewBag.Message != null)

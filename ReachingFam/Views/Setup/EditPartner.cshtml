@@ -1,5 +1,7 @@
 ﻿@model PartnerViewModel
 
+@inject CustomIDataProtection protector;
+
 @{
     ViewData["Title"] = "Update Partner";
 }
@@ -26,8 +28,8 @@
     <div class="row">
         <div class="col-12 col-lg-8 mx-auto">
             <div class="card">
-                <div class="card-body">
-                    <form asp-action="EditPartner" method="post">
+                <div class="card-body" onload="hideForm()">
+                    <form asp-action="EditPartner" asp-route-returnUrl="@protector.Encode(ViewBag.ReturnUrl)" method="post" id="editForm">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input type="hidden" asp-for="PartnerId" />
                         @if (ViewBag.Message != null)
@@ -36,14 +38,7 @@
                                 <strong>Oh snap!</strong> @ViewBag.Message
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
                             </div>
-                        }
-                        @if (ViewBag.Approval != null)
-                        {
-                            <div class="alert alert-success alert-dismissible" role="alert">
-                                <strong>Yay!</strong> @ViewBag.Approval
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
-                            </div>
-                        }
+                        }                        
                         <div class="form-group row">
                             <div class="col-md-6 mb-3">
                                 <label class="col-form-label" asp-for="Name"></label>
@@ -93,4 +88,16 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        // window.addEventListener('load', function () {
+        //     console.log('All assets are loaded');
+        //     document.getElementById("#editForm").style.visibility = "hidden";
+        // });
+
+        function hideForm() {
+            document.getElementById("#editForm").style.display = "none";
+        }
+        
+    </script>
 }

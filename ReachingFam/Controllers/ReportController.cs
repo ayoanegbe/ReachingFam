@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReachingFam.Core.Data;
@@ -12,6 +13,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ReachingFam.Controllers
 {
+    [Authorize]
     public class ReportController : Controller
     {
         private readonly ILogger<ReportController> _logger;

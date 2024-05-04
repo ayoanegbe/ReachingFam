@@ -1,0 +1,194 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Inward Item Details";
+    var oldValue = (InwardItem)ViewData["oldValue"];
+    var newValue = (InwardItem)ViewData["newValue"];
+}
+
+<div class="container-fluid">
+    <!-- Page-Title -->
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-title-box">
+                <div class="float-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Analytics</a></li>
+                        <li class="breadcrumb-item">
+                            <a asp-action="ItemsForApproval">Items For Approval</a>
+                        </li><!--end nav-item-->
+                        <li class="breadcrumb-item active">Inward Item Details</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Inward Item Details</h4>
+            </div><!--end page-title-box-->
+        </div><!--end col-->
+    </div>
+    <!-- end page title end breadcrumb -->
+    <div class="row">
+        <div class="col-12 col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <h4>Old Value</h4>
+                            <hr />
+                            <dl class="row">
+                                <dt class="col-sm-4">
+                                    Name
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @oldValue.Donor.Name
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Collection Date
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @oldValue.CollectionDate
+                                </dd>                                
+                                <dt class="col-sm-4">
+                                    Weight
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @oldValue.TotalWeight
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Non Perishables?
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @(oldValue.NonPerishables ? "Yes" : "No")
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Non Perishables Weight
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @oldValue.NonPerishablesWeight
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Perishables?
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @(oldValue.Perishables ? "Yes" : "No")
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Perishables Weight
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @oldValue.PerishablesWeight
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Non Food?
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @(oldValue.NonFood ? "Yes" : "No")
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Non Food Weight
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @oldValue.NonFoodWeight
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Frozen?
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @(oldValue.Frozen ? "Yes" : "No")
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Frozen Weight
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @oldValue.FrozenWeight
+                                </dd>                                
+                            </dl>
+                        </div>
+                        <div class="col-6">
+                            <h4>New Value</h4>
+                            <hr />
+                            <dl class="row">
+                                <dt class="col-sm-4">
+                                    Name
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @newValue.Donor.Name
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Collection Date
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @newValue.CollectionDate
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Weight
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @newValue.TotalWeight
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Non Perishables?
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @(newValue.NonPerishables ? "Yes" : "No")
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Non Perishables Weight
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @newValue.NonPerishablesWeight
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Perishables?
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @(newValue.Perishables ? "Yes" : "No")
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Perishables Weight
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @newValue.PerishablesWeight
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Non Food?
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @(newValue.NonFood ? "Yes" : "No")
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Non Food Weight
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @newValue.NonFoodWeight
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Frozen?
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @(newValue.Frozen ? "Yes" : "No")
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Frozen Weight
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @newValue.FrozenWeight
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div> <!--end card-body-->
+                <div class="card-footer">
+                    <div class="col">
+                        <a class="btn btn-outline-dark btn-sm px-4 " asp-action="PendingApprovals"><i class="fas fa-chevron-left"></i> Back</a>
+                    </div><!--end col-->
+                </div>
+            </div><!--end card-->
+        </div> <!--end col-->
+    </div><!--end row-->
+
+</div><!-- container -->
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

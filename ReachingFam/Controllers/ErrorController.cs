@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 
 namespace ReachingFam.Controllers
 {
+    [Authorize]
     public class ErrorController : Controller
     {
         private readonly ILogger<ErrorController> _logger;
@@ -14,12 +16,12 @@ namespace ReachingFam.Controllers
             _logger = logger;
         }
 
-        [Route("Error/404")]
-        public IActionResult Error404()
-        {
-            _logger.LogInformation("A 404 Error Has occurred");
-            return View();
-        }
+        //[Route("Error/404")]
+        //public IActionResult Error404()
+        //{
+        //    _logger.LogInformation("A 404 Error Has occurred");
+        //    return View();
+        //}
 
         [Route("Error/{code}")]
         public IActionResult Error(int code = 0)

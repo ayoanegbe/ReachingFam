@@ -20,11 +20,11 @@
                             </div>
                             <div class="card-body">
                                 <div class="ex-page-content text-center">
-                                    <img src="assets/images/error.svg" alt="0" class="" height="170">
-                                    <h1 class="mt-5 mb-4">@ViewData["ErrorCode"]!</h1>
+                                    <img src="~/images/error-img.png" alt="0" class="" height="170">
+                                    <h2 class="mt-5 mb-4">@ViewData["ErrorCode"]!</h2>
                                     <h5 class="font-16 text-muted mb-5">@ViewData["ErrorMessage"]</h5>
                                 </div>
-                                <a class="btn btn-primary w-100" asp-asp-controller="Home" asp-action="Index">Back to Dashboard <i class="fas fa-redo ml-1"></i></a>
+                                <a class="btn btn-primary w-100" asp-controller="Home" asp-action="Index">Back to Dashboard <i class="fas fa-redo ml-1"></i></a>
                             </div><!--end card-body-->
                             <div class="card-body bg-light-alt text-center">
                                 &copy; <script>

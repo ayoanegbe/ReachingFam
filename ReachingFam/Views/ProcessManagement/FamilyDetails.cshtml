@@ -1,0 +1,134 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Family Details";
+    var oldValue = (Family)ViewData["oldValue"];
+    var newValue = (Family)ViewData["newValue"];
+}
+
+<div class="container-fluid">
+    <!-- Page-Title -->
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-title-box">
+                <div class="float-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Analytics</a></li>
+                        <li class="breadcrumb-item">
+                            <a asp-action="ItemsForApproval">Items For Approval</a>
+                        </li><!--end nav-item-->
+                        <li class="breadcrumb-item active">Family Details</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Family Details</h4>
+            </div><!--end page-title-box-->
+        </div><!--end col-->
+    </div>
+    <!-- end page title end breadcrumb -->
+    <div class="row">
+        <div class="col-12 col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <h4>Old Value</h4>
+                            <hr />
+                            <dl class="row">
+                                <dt class="col-sm-4">
+                                    Last Name
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @oldValue.LastName
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Other Names
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @oldValue.OtherNames
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Address
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @oldValue.Address
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Email
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @oldValue.Email
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Phone
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @oldValue.Email
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Code
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @oldValue.Code
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="col-6">
+                            <h4>New Value</h4>
+                            <hr />
+                            <dl class="row">
+                                <dt class="col-sm-4">
+                                    Last Name
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @newValue.LastName
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Other Names
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @newValue.OtherNames
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Address
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @newValue.Address
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Email
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @newValue.Email
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Phone
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @newValue.Email
+                                </dd>
+                                <dt class="col-sm-4">
+                                    Code
+                                </dt>
+                                <dd class="col-sm-8">
+                                    @newValue.Code
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div> <!--end card-body-->
+                <div class="card-footer">
+                    <div class="col">
+                        <a class="btn btn-outline-dark btn-sm px-4 " asp-action="PendingApprovals"><i class="fas fa-chevron-left"></i> Back</a>
+                    </div><!--end col-->
+                </div>
+            </div><!--end card-->
+        </div> <!--end col-->
+    </div><!--end row-->
+
+</div><!-- container -->
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

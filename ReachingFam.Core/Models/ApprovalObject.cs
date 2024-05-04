@@ -8,7 +8,7 @@ namespace ReachingFam.Core.Models
 {
     public class ApprovalObject
     {
-        public int Id { get; set; }
-        public string RejectionReason { get; set; }
+        public string OldValue { get; set; }
+        public string NewValue { get; set; }
     }
 }

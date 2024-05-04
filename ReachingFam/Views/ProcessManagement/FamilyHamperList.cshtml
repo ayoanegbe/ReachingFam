@@ -62,7 +62,7 @@
                                         <td>@Html.DisplayFor(modelItem => item.DateCollected)</td>
                                         <td>@Html.DisplayFor(modelItem => item.DateAdded)</td>
                                         <td>
-                                            <a asp-action="EditFamilyHamper" asp-route-id="@protector.Encode(item.HamperId.ToString())"><i class="las la-pen text-secondary font-16"></i></a>
+                                            <a asp-action="EditFamilyHamper" asp-route-id="@protector.Encode(item.HamperId.ToString())" asp-route-returnUrl="@protector.Encode(ViewBag.ReturnUrl)"><i class="las la-pen text-secondary font-16"></i></a>
                                         </td>
                                     </tr>
                                 }

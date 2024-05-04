@@ -237,7 +237,7 @@ namespace CareConnect.Controllers
             foreach (var usr in users)
             {
                 var rol = await _userManager.GetRolesAsync(usr);
-                if (rol.Equals("Super Administrator"))
+                if (rol.Equals(Constants.SuperAdmin))
                     users.Remove(usr);
             }
 
@@ -267,7 +267,7 @@ namespace CareConnect.Controllers
 
             var user = await _userManager.FindByNameAsync(resolvedUser);            
 
-            if (await _userManager.IsInRoleAsync(user, "Super Administrator"))
+            if (await _userManager.IsInRoleAsync(user, Constants.SuperAdmin))
             {
                 return RedirectToAction(nameof(AccountController.GetAllUsers));
             }

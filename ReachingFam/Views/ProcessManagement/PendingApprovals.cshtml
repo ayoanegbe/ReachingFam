@@ -58,7 +58,7 @@
                                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dLabel11">
                                                     <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#approve">Approve</a>
                                                     <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reject">Reject</a>
-                                                    <a class="dropdown-item" href="#">View Details</a>
+                                                    <a class="dropdown-item" asp-action="ApprovalDetails" asp-route-id="@protector.Encode(item.ApprovalQueueId.ToString())">View Details</a>
                                                 </div>
                                             </div>
                                         </td>
@@ -94,20 +94,20 @@
                 <div class="modal-body">
                     <div class="form-group row">
                         <div class="col-md-12 mb-3">
-                            <label class="col-form-label" asp-for=@approvalQueue.ModuleName></label>
+                            <label class="col-form-label">Module Name</label>
                             <input asp-for=@approvalQueue.ModuleName type="text" disabled class="form-control">
                             <span asp-validation-for=@approvalQueue.ModuleName class="text-danger"></span>
                         </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-md-12 mb-3">
-                            <label class="col-form-label" asp-for=@approvalQueue.ChangeDate></label>
+                            <label class="col-form-label">Change Date</label>
                             <input asp-for=@approvalQueue.ChangeDate type="text" disabled class="form-control">
                         </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-md-12 mb-3">
-                            <label class="col-form-label" asp-for=@approvalQueue.ChangedBy></label>
+                            <label class="col-form-label">Changed By</label>
                             <input asp-for=@approvalQueue.ChangedBy type="text" disabled class="form-control">
                         </div>
                     </div>
@@ -138,19 +138,19 @@
                 <div class="modal-body">
                     <div class="form-group row">
                         <div class="col-md-12 mb-3">
-                            <label class="col-form-label" asp-for=@approvalQueue.ModuleName></label>
+                            <label class="col-form-label">Module Name</label>
                             <input asp-for=@approvalQueue.ModuleName type="text" disabled class="form-control">
                         </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-md-12 mb-3">
-                            <label class="col-form-label" asp-for=@approvalQueue.ChangeDate></label>
+                            <label class="col-form-label">Change Date</label>
                             <input asp-for=@approvalQueue.ChangeDate type="text" disabled class="form-control">
                         </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-md-12 mb-3">
-                            <label class="col-form-label" asp-for=@approvalQueue.ChangedBy></label>
+                            <label class="col-form-label" asp-for=@approvalQueue.ChangedBy>Changed By</label>
                             <input asp-for=@approvalQueue.ChangedBy type="text" disabled class="form-control">
                         </div>
                     </div>

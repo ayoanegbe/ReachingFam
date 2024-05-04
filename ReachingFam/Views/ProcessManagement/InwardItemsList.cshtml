@@ -55,7 +55,7 @@
                                         <td>@Html.DisplayFor(modelItem => item.TotalWaste)</td>
                                         <td>@Html.DisplayFor(modelItem => item.DateAdded)</td>
                                         <td>
-                                            <a asp-action="EditInwardItem" asp-route-id="@protector.Encode(item.InwardItemId.ToString())"><i class="las la-pen text-secondary font-16"></i></a>
+                                            <a asp-action="EditInwardItem" asp-route-id="@protector.Encode(item.InwardItemId.ToString())" asp-route-returnUrl="@protector.Encode(ViewBag.ReturnUrl)"><i class="las la-pen text-secondary font-16"></i></a>
                                         </td>
                                     </tr>
                                 }

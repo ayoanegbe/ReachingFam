@@ -14,5 +14,6 @@ namespace ReachingFam.Core.Models
         public const string SharedKeyDir = "C:\\app-keyring";
         public const string AppName = "Reaching Family Ops";
         public const string VisitorRef = "VisitorReference";
+        public const string SuperAdmin = "Super Administrator";
     }
 }

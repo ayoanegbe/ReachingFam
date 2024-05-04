@@ -57,7 +57,7 @@
                                         <td>@Html.DisplayFor(modelItem => item.ContactPhone)</td>
                                         <td>@Html.DisplayFor(modelItem => item.DateAdded)</td>
                                         <td>
-                                            <a asp-action="EditPartner" asp-route-id="@protector.Encode(item.PartnerId.ToString())"><i class="las la-pen text-secondary font-16"></i></a>
+                                            <a asp-action="EditPartner" asp-route-id="@protector.Encode(item.PartnerId.ToString())" asp-route-returnUrl="@protector.Encode(ViewBag.ReturnUrl)"><i class="las la-pen text-secondary font-16"></i></a>
                                         </td>
                                     </tr>
                                 }

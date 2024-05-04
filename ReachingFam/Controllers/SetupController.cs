@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -11,6 +12,7 @@ using ReachingFam.Core.Services;
 
 namespace ReachingFam.Controllers
 {
+    [Authorize]
     public class SetupController(
         ILogger<SetupController> logger,
         ApplicationDbContext context,
@@ -38,6 +40,8 @@ namespace ReachingFam.Controllers
 
         public async Task<IActionResult> ListDonors()
         {
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+
             return View(await _context.Donors.OrderByDescending(x => x.DonorId).ToListAsync());
         }
 
@@ -88,7 +92,7 @@ namespace ReachingFam.Controllers
             return View(donorView);
         }
 
-        public async Task<IActionResult> EditDonor(string id)
+        public async Task<IActionResult> EditDonor(string id, string returnUrl = null)
         {
             if (id == null)
             {
@@ -117,12 +121,20 @@ namespace ReachingFam.Controllers
                 ContactPhone = donor.ContactPhone,
             };
 
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            ViewData["ReturnUrl"] = retUrl;
+
             return View(donorView);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditDonor(string id, [Bind("DonorId,Name,Address,ContactEmail,ContactPhone")] DonorViewModel donorView)
+        public async Task<IActionResult> EditDonor(string id, [Bind("DonorId,Name,Address,ContactEmail,ContactPhone")] DonorViewModel donorView, string returnUrl = null)
         {
             int num = _resolverService.ResolveInterger(id);
             if (num == 0)
@@ -151,10 +163,15 @@ namespace ReachingFam.Controllers
             var oldValue = JsonConvert.SerializeObject(await _context.Donors.FirstOrDefaultAsync(x => x.DonorId == donor.DonorId));
             var newValue = JsonConvert.SerializeObject(donor);
 
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
 
             if (await _approvalService.UpdateApprovalQueue(donor.GetType().Name, "Donor", UpdateAction.Update, oldValue, newValue, user.UserName))
             {
-                ViewBag.Approval = "Your changes have been forwarded for approval";
+                return RedirectToAction(nameof(Confirmation), new { url = retUrl });
             }
             else
             {
@@ -168,6 +185,8 @@ namespace ReachingFam.Controllers
 
         public async Task<IActionResult> ListPartners()
         {
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+
             return View(await _context.Partners.OrderByDescending(x => x.PartnerId).ToListAsync());
         }
 
@@ -219,7 +238,7 @@ namespace ReachingFam.Controllers
             return View(partnerView);
         }
 
-        public async Task<IActionResult> EditPartner(string id)
+        public async Task<IActionResult> EditPartner(string id, string returnUrl = null)
         {
             if (id == null)
             {
@@ -239,6 +258,12 @@ namespace ReachingFam.Controllers
                 return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
             }
 
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
             PartnerViewModel partnerView = new()
             {
                 PartnerId = partner.PartnerId,
@@ -249,13 +274,15 @@ namespace ReachingFam.Controllers
                 ContactPhone = partner.ContactPhone,
             };
 
+            ViewData["ReturnUrl"] = retUrl;
+
             return View(partnerView);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPartner(string id, [Bind("PartnerId,Name,Catergory,Address,ContactEmail,ContactPhone")] PartnerViewModel partnerView)
-        {
+        public async Task<IActionResult> EditPartner(string id, [Bind("PartnerId,Name,Catergory,Address,ContactEmail,ContactPhone")] PartnerViewModel partnerView, string returnUrl = null)
+        {            
             int num = _resolverService.ResolveInterger(id);
             if (num == 0)
             {
@@ -265,6 +292,12 @@ namespace ReachingFam.Controllers
             if (num != partnerView.PartnerId)
             {
                 return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
             }
 
             var user = await _userManager.GetUserAsync(User);
@@ -284,10 +317,9 @@ namespace ReachingFam.Controllers
             var oldValue = JsonConvert.SerializeObject(await _context.Partners.FirstOrDefaultAsync(x => x.PartnerId == partner.PartnerId));
             var newValue = JsonConvert.SerializeObject(partner);
 
-
             if (await _approvalService.UpdateApprovalQueue(partner.GetType().Name, "Partner", UpdateAction.Update, oldValue, newValue, user.UserName))
-            {
-                ViewBag.Approval = "Your changes have been forwarded for approval";
+            {                                
+                return RedirectToAction(nameof(Confirmation), new { url = retUrl });
             }
             else
             {
@@ -299,8 +331,18 @@ namespace ReachingFam.Controllers
             return View(partnerView);
         }
 
+        public IActionResult Confirmation(string url)
+        {
+            ViewData["Approval"] = "Your changes have been forwarded for approval";
+            ViewData["ReturnUrl"] = url;
+
+            return View();
+        }
+
         public async Task<IActionResult> ListFamilies()
         {
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+
             return View(await _context.Families.OrderByDescending(x => x.FamilyId).ToListAsync());
         }
 
@@ -351,7 +393,7 @@ namespace ReachingFam.Controllers
             return View(familyView);
         }
 
-        public async Task<IActionResult> EditFamily(string id)
+        public async Task<IActionResult> EditFamily(string id, string returnUrl = null)
         {
             if (id == null)
             {
@@ -371,6 +413,12 @@ namespace ReachingFam.Controllers
                 return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
             }
 
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
             FamilyViewModel familyView = new()
             {
                 FamilyId = family.FamilyId,
@@ -382,12 +430,14 @@ namespace ReachingFam.Controllers
                 Code = family.Code,
             };
 
+            ViewData["ReturnUrl"] = retUrl;
+
             return View(familyView);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditFamily(string id, [Bind("FamilyId,LastName,OtherNames,Address,Email,Phone,Code")] FamilyViewModel familyView)
+        public async Task<IActionResult> EditFamily(string id, [Bind("FamilyId,LastName,OtherNames,Address,Email,Phone,Code")] FamilyViewModel familyView, string returnUrl = null)
         {
             int num = _resolverService.ResolveInterger(id);
             if (num == 0)
@@ -398,6 +448,12 @@ namespace ReachingFam.Controllers
             if (num != familyView.FamilyId)
             {
                 return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
             }
 
             var user = await _userManager.GetUserAsync(User);
@@ -416,10 +472,9 @@ namespace ReachingFam.Controllers
             var oldValue = JsonConvert.SerializeObject(await _context.Families.FirstOrDefaultAsync(x => x.FamilyId == family.FamilyId));
             var newValue = JsonConvert.SerializeObject(family);
 
-
             if (await _approvalService.UpdateApprovalQueue(family.GetType().Name, "Family", UpdateAction.Update, oldValue, newValue, user.UserName))
             {
-                ViewBag.Approval = "Your changes have been forwarded for approval";
+                return RedirectToAction(nameof(Confirmation), new { url = retUrl });
             }
             else
             {
@@ -430,22 +485,7 @@ namespace ReachingFam.Controllers
 
             return View(familyView);
         }
+       
 
-
-        private bool DonorExists(int id)
-        {
-            return _context.Donors.Any(x => x.DonorId == id);
-        }
-
-        private bool PartnerExists(int id)
-        {
-            return _context.Partners.Any(x => x.PartnerId == id);
-        }
-
-        private bool FamilyExists(int id)
-        {
-            return _context.Families.Any(x => x.FamilyId == id);
-        }
-        
     }
 }

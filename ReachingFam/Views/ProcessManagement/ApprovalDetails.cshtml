@@ -1,0 +1,48 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Approval Details";
+}
+
+<div class="container-fluid">
+    <!-- Page-Title -->
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-title-box">
+                <div class="float-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Analytics</a></li>
+                        <li class="breadcrumb-item">
+                            <a asp-action="ItemsForApproval">Items For Approval</a>
+                        </li><!--end nav-item-->
+                        <li class="breadcrumb-item active">Approval Details</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Approval Details</h4>
+            </div><!--end page-title-box-->
+        </div><!--end col-->
+    </div>
+    <!-- end page title end breadcrumb -->
+    <div class="row">
+        <div class="col-12 col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    @if (ViewBag.Message != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible" role="alert">
+                            <strong>Oh snap!</strong> @ViewBag.Message
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+                        </div>
+                    }                    
+                </div> <!--end card-body-->
+            </div><!--end card-->
+        </div> <!--end col-->
+    </div><!--end row-->
+
+</div><!-- container -->
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

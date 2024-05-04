@@ -1,5 +1,5 @@
 ﻿@model FamilyViewModel
-
+@inject CustomIDataProtection protector;
 @{
     ViewData["Title"] = "Update Family";
 }
@@ -27,20 +27,13 @@
         <div class="col-12 col-lg-8 mx-auto">
             <div class="card">
                 <div class="card-body">
-                    <form asp-action="EditFamily" method="post">
+                    <form asp-action="EditFamily" asp-route-returnUrl="@protector.Encode(ViewBag.ReturnUrl)" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input type="hidden" asp-for="FamilyId" />
                         @if (ViewBag.Message != null)
                         {
                             <div class="alert alert-danger alert-dismissible" role="alert">
                                 <strong>Oh snap!</strong> @ViewBag.Message
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
-                            </div>
-                        }
-                        @if (ViewBag.Approval != null)
-                        {
-                            <div class="alert alert-success alert-dismissible" role="alert">
-                                <strong>Yay!</strong> @ViewBag.Approval
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
                             </div>
                         }

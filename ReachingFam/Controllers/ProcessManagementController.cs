@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.Classification;
@@ -16,6 +17,7 @@ using System.Linq;
 
 namespace ReachingFam.Controllers
 {
+    [Authorize]
     public class ProcessManagementController(
         ILogger<SetupController> logger,
         ApplicationDbContext context,
@@ -40,6 +42,8 @@ namespace ReachingFam.Controllers
 
         public async Task<IActionResult> InwardItemsList()
         {
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+
             return View(await _context.InwardItems.Include(x => x.Donor).OrderByDescending(x => x.InwardItemId).ToListAsync());
         }
 
@@ -115,7 +119,7 @@ namespace ReachingFam.Controllers
             return View(inwardItemView);
         }
 
-        public async Task<IActionResult> EditInwardItem(string id)
+        public async Task<IActionResult> EditInwardItem(string id, string returnUrl = null)
         {
             if (id == null)
             {
@@ -151,6 +155,14 @@ namespace ReachingFam.Controllers
                 NonFoodWeight = inwardItem.NonFoodWeight,
             };
 
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            ViewData["ReturnUrl"] = retUrl;
+
             ViewData["DonorId"] = new SelectList(_context.Donors, "DonorId", "Name", inwardItem.InwardItemId);
 
             return View(inwardItemView);
@@ -158,7 +170,7 @@ namespace ReachingFam.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditInwardItem(string id, [Bind("InwardItemId,DonorId,CollectionDate,TotalWeight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight")] InwardItemViewModel inwardItemView)
+        public async Task<IActionResult> EditInwardItem(string id, [Bind("InwardItemId,DonorId,CollectionDate,TotalWeight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight")] InwardItemViewModel inwardItemView, string returnUrl = null)
         {
             int num = _resolverService.ResolveInterger(id);
             if (num == 0)
@@ -196,10 +208,15 @@ namespace ReachingFam.Controllers
             var oldValue = JsonConvert.SerializeObject(await _context.InwardItems.FirstOrDefaultAsync(x => x.InwardItemId == inwardItem.InwardItemId));
             var newValue = JsonConvert.SerializeObject(inwardItem);
 
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
 
             if (await _approvalService.UpdateApprovalQueue(inwardItem.GetType().Name, "Inward Item", UpdateAction.Update, oldValue, newValue, user.UserName))
             {
-                ViewBag.Approval = "Your changes have been forwarded for approval";
+                return RedirectToAction(nameof(Confirmation), new { url = retUrl });
             }
             else
             {
@@ -215,6 +232,8 @@ namespace ReachingFam.Controllers
 
         public async Task<IActionResult> FamilyHamperList()
         {
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+
             return View(await _context.Hampers.Include(x => x.Family).OrderByDescending(x => x.HamperId).ToListAsync());
         }
 
@@ -312,7 +331,7 @@ namespace ReachingFam.Controllers
             return View(hamperView);
         }
 
-        public async Task<IActionResult> EditFamilyHamper(string id)
+        public async Task<IActionResult> EditFamilyHamper(string id, string returnUrl = null)
         {
             if (id == null)
             {
@@ -354,6 +373,14 @@ namespace ReachingFam.Controllers
                 Collected = hamper.Collected
             };
 
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            ViewData["ReturnUrl"] = retUrl;
+
             ViewData["FamilyId"] = new SelectList(_context.Families, "FamilyId", "FullName", hamper.HamperId);
 
             return View();
@@ -361,7 +388,7 @@ namespace ReachingFam.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditFamilyHamper(string id, [Bind("HamperId,FamilyId,CollectionDate,CollectionTime,Weight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight,FamilySize,Seniors,Adults,Children,Collected")] HamperViewModel hamperView)
+        public async Task<IActionResult> EditFamilyHamper(string id, [Bind("HamperId,FamilyId,CollectionDate,CollectionTime,Weight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight,FamilySize,Seniors,Adults,Children,Collected")] HamperViewModel hamperView, string returnUrl = null)
         {
             int num = _resolverService.ResolveInterger(id);
             if (num == 0)
@@ -421,9 +448,15 @@ namespace ReachingFam.Controllers
             var oldValue = JsonConvert.SerializeObject(await _context.Hampers.FirstOrDefaultAsync(x => x.HamperId == hamper.HamperId));
             var newValue = JsonConvert.SerializeObject(hamper);
 
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
             if (await _approvalService.UpdateApprovalQueue(hamper.GetType().Name, "Family Hamper", UpdateAction.Update, oldValue, newValue, user.UserName))
             {
-                ViewBag.Approval = "Your changes have been forwarded for approval";
+                return RedirectToAction(nameof(Confirmation), new { url = retUrl });
             }
             else
             {
@@ -439,6 +472,8 @@ namespace ReachingFam.Controllers
 
         public async Task<IActionResult> PartnerGiveOutList()
         {
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+
             return View(await _context.PartnerGiveOuts.Include(x => x.Partner).OrderByDescending(x => x.PartnerGiveOutId).ToListAsync());
         }
 
@@ -516,7 +551,7 @@ namespace ReachingFam.Controllers
             return View(partnerGiveOutView);
         }
 
-        public async Task<IActionResult> EditPartnerGiveOut(string id)
+        public async Task<IActionResult> EditPartnerGiveOut(string id, string returnUrl = null)
         {
             if(id == null)
             {
@@ -554,6 +589,14 @@ namespace ReachingFam.Controllers
                 Collected = partnerGiveOut.Collected
             };
 
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            ViewData["ReturnUrl"] = retUrl;
+
             ViewData["PartnerId"] = new SelectList(_context.Partners, "PartnerId", "Name", partnerGiveOutView.PartnerGiveOutId);
 
             return View();
@@ -561,7 +604,7 @@ namespace ReachingFam.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPartnerGiveOut(string id, [Bind("PartnerGiveOutId,PartnerId,CollectionDate,CollectionTime,Weight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight,Collected")] PartnerGiveOutViewModel partnerGiveOutView)
+        public async Task<IActionResult> EditPartnerGiveOut(string id, [Bind("PartnerGiveOutId,PartnerId,CollectionDate,CollectionTime,Weight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight,Collected")] PartnerGiveOutViewModel partnerGiveOutView, string returnUrl = null)
         {
             int num = _resolverService.ResolveInterger(id);
             if (num == 0)
@@ -601,10 +644,15 @@ namespace ReachingFam.Controllers
             var oldValue = JsonConvert.SerializeObject(await _context.PartnerGiveOuts.FirstOrDefaultAsync(x => x.PartnerGiveOutId == partnerGiveOut.PartnerGiveOutId));
             var newValue = JsonConvert.SerializeObject(partnerGiveOut);
 
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
 
             if (await _approvalService.UpdateApprovalQueue(partnerGiveOut.GetType().Name, "Partner Hamper", UpdateAction.Update, oldValue, newValue, user.UserName))
             {
-                ViewBag.Approval = "Your changes have been forwarded for approval";
+                return RedirectToAction(nameof(Confirmation), new { url = retUrl });
             }
             else
             {
@@ -620,11 +668,15 @@ namespace ReachingFam.Controllers
 
         public async Task<IActionResult> VolunteerGiveOutList()
         {
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+
             return View(await _context.VolunteerGiveOuts.Include(x => x.User).OrderByDescending(x => x.VolunteerGiveOutId).ToListAsync());
         }
 
         public IActionResult AddVolunteerGiveOut()
         {
+            ViewData["Email"] = new SelectList(_userManager.Users, "Email", "FullName");
+
             return View( new VolunteerGiveOutViewModel() { CollectionDate = DateTime.Now});
         }
 
@@ -679,7 +731,7 @@ namespace ReachingFam.Controllers
             return View(volunteerGiveOutView);
         }
 
-        public async Task<IActionResult> EditVolunteerGiveOut(string id)
+        public async Task<IActionResult> EditVolunteerGiveOut(string id, string returnUrl = null)
         {
             if (id == null)
             {
@@ -715,6 +767,14 @@ namespace ReachingFam.Controllers
                 NonFoodWeight = volunteerGiveOut.NonFoodWeight
             };
 
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            ViewData["ReturnUrl"] = retUrl;
+
             ViewData["Email"] = new SelectList(_userManager.Users, "Email", "FullName", volunteerGiveOut.Email);
 
             return View(volunteerGiveOutView);
@@ -722,7 +782,7 @@ namespace ReachingFam.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditVolunteerGiveOut(string id, [Bind("VolunteerGiveOutId,Email,CollectionDate,Weight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight")] VolunteerGiveOutViewModel volunteerGiveOutView)
+        public async Task<IActionResult> EditVolunteerGiveOut(string id, [Bind("VolunteerGiveOutId,Email,CollectionDate,Weight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight")] VolunteerGiveOutViewModel volunteerGiveOutView, string returnUrl = null)
         {
             int num = _resolverService.ResolveInterger(id);
             if (num == 0)
@@ -760,9 +820,15 @@ namespace ReachingFam.Controllers
             var oldValue = JsonConvert.SerializeObject(await _context.VolunteerGiveOuts.FirstOrDefaultAsync(x => x.VolunteerGiveOutId == volunteerGiveOut.VolunteerGiveOutId));
             var newValue = JsonConvert.SerializeObject(volunteerGiveOut);
 
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
             if (await _approvalService.UpdateApprovalQueue(volunteerGiveOut.GetType().Name, "Volunteer Hamper", UpdateAction.Update, oldValue, newValue, user.UserName))
             {
-                ViewBag.Approval = "Your changes have been forwarded for approval";
+                return RedirectToAction(nameof(Confirmation), new { url = retUrl });
             }
             else
             {
@@ -778,6 +844,8 @@ namespace ReachingFam.Controllers
 
         public async Task<IActionResult> WastesList()
         {
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+
             return View(await _context.Wastes.ToListAsync());
         }
 
@@ -835,7 +903,7 @@ namespace ReachingFam.Controllers
             return View(wasteView);
         }
 
-        public async Task<IActionResult> EditWaste(string id)
+        public async Task<IActionResult> EditWaste(string id, string returnUrl = null)
         {
             if (id == null)
             {
@@ -871,12 +939,20 @@ namespace ReachingFam.Controllers
                 Note = waste.Note,
             };
 
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            ViewData["ReturnUrl"] = retUrl;
+
             return View(wasteView);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditWaste(string id, [Bind("WasteId,Date,Weight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight,Note")] WasteViewModel wasteView)
+        public async Task<IActionResult> EditWaste(string id, [Bind("WasteId,Date,Weight,NonPerishables,NonPerishablesWeight,Perishables,PerishablesWeight,Frozen,FrozenWeight,NonFood,NonFoodWeight,Note")] WasteViewModel wasteView, string returnUrl = null)
         {
             int num = _resolverService.ResolveInterger(id);
             if (num == 0)
@@ -914,9 +990,15 @@ namespace ReachingFam.Controllers
             var oldValue = JsonConvert.SerializeObject(await _context.Wastes.FirstOrDefaultAsync(x => x.WasteId == waste.WasteId));
             var newValue = JsonConvert.SerializeObject(waste);
 
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
             if (await _approvalService.UpdateApprovalQueue(waste.GetType().Name, "Waste Item", UpdateAction.Update, oldValue, newValue, user.UserName))
             {
-                ViewBag.Approval = "Your changes have been forwarded for approval";
+                return RedirectToAction(nameof(Confirmation), new { url = retUrl });
             }
             else
             {
@@ -1033,6 +1115,14 @@ namespace ReachingFam.Controllers
             return RedirectToAction(nameof(ItemsForCollection));
         }
 
+        public IActionResult Confirmation(string url)
+        {
+            ViewData["Approval"] = "Your changes have been forwarded for approval";
+            ViewData["ReturnUrl"] = url;
+
+            return View();
+        }
+
         public async Task<IActionResult> PendingApprovals()
         {
             return View(await _context.Approvals.OrderByDescending(x => x.ApprovalQueueId).ToListAsync());
@@ -1041,8 +1131,9 @@ namespace ReachingFam.Controllers
         public async Task<IActionResult> ItemsForApproval()
         {
             return View(await _context.Approvals.OrderByDescending(x => x.ApprovalQueueId).ToListAsync());
-        }   
+        }
 
+        [HttpPost]
         public async Task<IActionResult> ItemsForApproval(DateRangeViewModel dateRangeView)
         {
             return View(await _context.Approvals.Where(x => x.ChangeDate >= dateRangeView.StartDate && x.ChangeDate >= dateRangeView.EndDate).OrderByDescending(x => x.ApprovalQueueId).ToListAsync());
@@ -1137,65 +1228,245 @@ namespace ReachingFam.Controllers
                 return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
             }
 
-            Type classType = Type.GetType(approvalQueue.TableName);
-
-            object classObj = Activator.CreateInstance(classType);
-
-            var newClass = System.Reflection.Assembly.GetAssembly(classType).CreateInstance(approvalQueue.TableName);
-
-            //var oldvalue = JsonConvert.DeserializeObject<newClass> (approvalQueue.OldValue);
+            ApprovalObject approvalObject = new() { OldValue = approvalQueue.OldValue, NewValue = approvalQueue.NewValue };
+            string serializedObj = JsonConvert.SerializeObject(approvalObject);
+            var encrptedObj = _protector.Encode(serializedObj);
 
             switch (approvalQueue.TableName)
             {
                 case "Donor":
-                    Donor donorOld = JsonConvert.DeserializeObject<Donor>(approvalQueue.OldValue);
-                    Donor donorNew = JsonConvert.DeserializeObject<Donor>(approvalQueue.NewValue);
-                    break;
+                    return RedirectToAction(nameof(DonorDetails), new { obj = encrptedObj });
                 case "Family":
-                    Family familyOld = JsonConvert.DeserializeObject<Family>(approvalQueue.OldValue);
-                    Family familyNew = JsonConvert.DeserializeObject<Family>(approvalQueue.NewValue);
-                    break;
+                    return RedirectToAction(nameof(FamilyDetails), new { obj = encrptedObj });
                 case "Hamper":
-                    Hamper hamperOld = JsonConvert.DeserializeObject<Hamper>(approvalQueue.OldValue);
-                    Hamper hamperNew = JsonConvert.DeserializeObject<Hamper>(approvalQueue.NewValue);
-                    break;
+                    return RedirectToAction(nameof(HamperDetails), new { obj = encrptedObj });
                 case "InwardItem":
-                    InwardItem inwardOld = JsonConvert.DeserializeObject<InwardItem>(approvalQueue.OldValue);
-                    InwardItem inwardNew = JsonConvert.DeserializeObject<InwardItem>(approvalQueue.NewValue);
-                    break;
+                    return RedirectToAction(nameof(InwardItemDetails), new { obj = encrptedObj });
                 case "Partner":
-                    Partner partnerOld = JsonConvert.DeserializeObject<Partner>(approvalQueue.OldValue);
-                    Partner partnerNew = JsonConvert.DeserializeObject<Partner>(approvalQueue.NewValue);
+                    return RedirectToAction(nameof(PartnerDetails), new { obj = encrptedObj });
+                case "PartnerGiveOut":
+                    return RedirectToAction(nameof(PartnerGiveOutDetails), new { obj = encrptedObj });
+                case "VolunteerGiveOut":
+                    return RedirectToAction(nameof(VolunteerGiveOutDetails), new { obj = encrptedObj });
+                case "Waste":
+                    return RedirectToAction(nameof(WasteDetails), new { obj = encrptedObj });
+                default:
+                    ViewBag.Message = "Unable to get changes. " +
+                    "Try again, and if the problem persists, " +
+                    "see your system administrator.";
                     break;
             }
 
-            return View(approvalQueue);
+            return View();
         }
 
-        private bool InwardItemExists(int id)
+        public IActionResult DonorDetails(string obj)
         {
-            return _context.InwardItems.Any(x => x.InwardItemId == id);
+            if (obj == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            ApprovalObject approvalObject = _resolverService.ResolveObject<ApprovalObject>(obj);
+            if (approvalObject == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            Donor oldValue = JsonConvert.DeserializeObject<Donor>(approvalObject.OldValue);
+            Donor newValue = JsonConvert.DeserializeObject<Donor>(approvalObject.NewValue);
+
+            ViewData["oldValue"] = oldValue;
+            ViewData["newValue"] = newValue;
+
+            return View();
         }
 
-        private bool HamperExists(int id)
+        public IActionResult FamilyDetails(string obj)
         {
-            return _context.Hampers.Any(x => x.HamperId == id);
+            if (obj == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            ApprovalObject approvalObject = _resolverService.ResolveObject<ApprovalObject>(obj);
+            if (approvalObject == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            Family oldValue = JsonConvert.DeserializeObject<Family>(approvalObject.OldValue);
+            Family newValue = JsonConvert.DeserializeObject<Family>(approvalObject.NewValue);
+
+            ViewData["oldValue"] = oldValue;
+            ViewData["newValue"] = newValue;
+
+            return View();
         }
 
-        private bool PartnerGiveOutExists(int id)
+        public async Task<IActionResult> HamperDetails(string obj)
         {
-            return _context.PartnerGiveOuts.Any(x => x.PartnerGiveOutId == id);
+            if (obj == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            ApprovalObject approvalObject = _resolverService.ResolveObject<ApprovalObject>(obj);
+            if (approvalObject == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            Hamper oldValue = JsonConvert.DeserializeObject<Hamper>(approvalObject.OldValue);
+            Hamper newValue = JsonConvert.DeserializeObject<Hamper>(approvalObject.NewValue);
+
+            Family familyOld = await _context.Families.FirstOrDefaultAsync(x => x.FamilyId == oldValue.FamilyId);
+            Family familyNew = await _context.Families.FirstOrDefaultAsync(x => x.FamilyId == newValue.FamilyId);
+
+            oldValue.Family = familyOld;
+            newValue.Family = familyNew;
+
+            ViewData["oldValue"] = oldValue;
+            ViewData["newValue"] = newValue;
+
+            return View();
         }
 
-        private bool VolunteerGiveOutExists(int id)
+        public async Task<IActionResult> InwardItemDetails(string obj)
         {
-            return _context.VolunteerGiveOuts.Any(x => x.VolunteerGiveOutId == id);
+            if (obj == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            ApprovalObject approvalObject = _resolverService.ResolveObject<ApprovalObject>(obj);
+            if (approvalObject == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            InwardItem oldValue = JsonConvert.DeserializeObject<InwardItem>(approvalObject.OldValue);
+            InwardItem newValue = JsonConvert.DeserializeObject<InwardItem>(approvalObject.NewValue);
+
+            Donor donorOld = await _context.Donors.FirstOrDefaultAsync(x => x.DonorId == oldValue.DonorId);
+            Donor donorNew = await _context.Donors.FirstOrDefaultAsync(x => x.DonorId == newValue.DonorId);
+
+            oldValue.Donor = donorOld;
+            newValue.Donor = donorNew;
+
+            ViewData["oldValue"] = oldValue;
+            ViewData["newValue"] = newValue;
+
+            return View();
         }
 
-        private bool WasteExists(int id)
+        public IActionResult PartnerDetails(string obj)
         {
-            return _context.Wastes.Any(x => x.WasteId == id);
-        }        
+            if (obj == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            ApprovalObject approvalObject = _resolverService.ResolveObject<ApprovalObject>(obj);
+            if (approvalObject == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            Partner oldValue = JsonConvert.DeserializeObject<Partner>(approvalObject.OldValue);
+            Partner newValue = JsonConvert.DeserializeObject<Partner>(approvalObject.NewValue);
+
+            ViewData["oldValue"] = oldValue;
+            ViewData["newValue"] = newValue;
+
+            return View();
+        }
+
+        public async Task<IActionResult> PartnerGiveOutDetails(string obj)
+        {
+            if (obj == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            ApprovalObject approvalObject = _resolverService.ResolveObject<ApprovalObject>(obj);
+            if (approvalObject == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            PartnerGiveOut oldValue = JsonConvert.DeserializeObject<PartnerGiveOut>(approvalObject.OldValue);
+            PartnerGiveOut newValue = JsonConvert.DeserializeObject<PartnerGiveOut>(approvalObject.NewValue);
+
+            Partner partnerOld = await _context.Partners.FirstOrDefaultAsync(x => x.PartnerId == oldValue.PartnerId);
+            Partner partnerNew = await _context.Partners.FirstOrDefaultAsync(x => x.PartnerId == newValue.PartnerId);
+
+            oldValue.Partner = partnerOld;
+            newValue.Partner = partnerNew;
+
+            ViewData["oldValue"] = oldValue;
+            ViewData["newValue"] = newValue;
+
+            return View();
+        }
+
+        public async Task<IActionResult> VolunteerGiveOutDetails(string obj)
+        {
+            if (obj == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            ApprovalObject approvalObject = _resolverService.ResolveObject<ApprovalObject>(obj);
+            if (approvalObject == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            VolunteerGiveOut oldValue = JsonConvert.DeserializeObject<VolunteerGiveOut>(approvalObject.OldValue);
+            VolunteerGiveOut newValue = JsonConvert.DeserializeObject<VolunteerGiveOut>(approvalObject.NewValue);
+
+            ApplicationUser userOld = await _userManager.FindByEmailAsync(oldValue.Email);
+            ApplicationUser userNew = await _userManager.FindByEmailAsync(newValue.Email);
+
+            oldValue.User = userOld;
+            newValue.User = userNew;
+
+            ViewData["oldValue"] = oldValue;
+            ViewData["newValue"] = newValue;
+
+            return View();
+        }
+
+        public IActionResult WasteDetails(string obj)
+        {
+            if (obj == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            ApprovalObject approvalObject = _resolverService.ResolveObject<ApprovalObject>(obj);
+            if (approvalObject == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            Waste oldValue = JsonConvert.DeserializeObject<Waste>(approvalObject.OldValue);
+            Waste newValue = JsonConvert.DeserializeObject<Waste>(approvalObject.NewValue);
+
+            ViewData["oldValue"] = oldValue;
+            ViewData["newValue"] = newValue;
+
+            return View();
+        }      
 
         private async Task<(string filePath, string thumbFilePath, string message)> ProcessFile(IFormFile file, string mainDirectory, string subDirectory)
         {

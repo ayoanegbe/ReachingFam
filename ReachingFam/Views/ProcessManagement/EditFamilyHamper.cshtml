@@ -1,5 +1,7 @@
 ﻿@model HamperViewModel
 
+@inject CustomIDataProtection protector;
+
 @{
     ViewData["Title"] = "Edit Family Hamper";
 }
@@ -27,7 +29,7 @@
         <div class="col-12 col-lg-8 mx-auto">
             <div class="card">
                 <div class="card-body">
-                    <form asp-action="EditFamilyHamper" method="post">
+                    <form asp-action="EditFamilyHamper" asp-route-returnUrl="@protector.Encode(ViewBag.ReturnUrl)" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input type="hidden" asp-for="HamperId" />
                         @if (ViewBag.Message != null)

@@ -29,6 +29,5 @@ namespace ReachingFam.Core.Models
         [Display(Name = "Updated By")]
         public string UpdatedBy { get; set; }
 
-        //public static Donor Deserialize(string serializedData) => JsonConvert.DeserializeObject<Donor>(serializedData);
     }
 }

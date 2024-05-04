@@ -1,0 +1,15 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Confirmation";
+}
+
+<div class="col-md-12">
+    <div class="portlet light ">
+        <h3 class="portlet-title">@ViewData["Title"]</h3>
+        <div class="portlet-body">
+            <div class="alert alert-info"> @ViewBag.Approval. Please click <a href="@ViewBag.ReturnUrl" class="text-danger">here</a> to continue. </div>
+        </div>
+    </div>
+</div>
