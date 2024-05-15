@@ -10,5 +10,6 @@ namespace ReachingFam.Core.Models
     {
         public string OldValue { get; set; }
         public string NewValue { get; set; }
+        public string ReturnUrl { get; set; }
     }
 }

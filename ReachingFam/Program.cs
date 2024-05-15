@@ -97,6 +97,11 @@ namespace ReachingFam
                 app.UseHsts();
             }
 
+            app.UseCors(x => x
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 

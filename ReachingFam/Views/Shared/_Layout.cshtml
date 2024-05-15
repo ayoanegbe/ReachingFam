@@ -46,9 +46,7 @@
 
     <script src="~/libs/mobius1-selectr/selectr.min.js"></script>
     <script src="~/libs/huebee/huebee.pkgd.min.js"></script>
-
-    <script src="~/lib/cryptography/aes.js"></script>   
-
+     
     <script src="~/libs/simple-datatables/umd/simple-datatables.js"></script>
     <script src="~/js/pages/datatable.init.js"></script>
 
@@ -57,33 +55,13 @@
 
     <script src="~/js/pages/forms-advanced.js"></script>
     <script src="~/js/pages/form-validation.js"></script>
+    <script src="~/lib/cryptography/aes.js"></script>
 
     <!-- App js -->
     <script src="~/js/app.js"></script>
     <script src="~/js/working_data.js"></script>
     <script src="~/js/app_common.js"></script>
-    @* <script src="~/js/food_dist.js"></script> *@
 
-    <script>
-
-        
-
-
-        // const items = ['-', '.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-
-        // var number_input = document.getElementById('number_input');
-
-        // number_input.addEventListener('keypress', function (evt) {
-
-        //     if (!items.includes(evt.key)) {
-        //         evt.preventDefault();
-        //     }
-        // });
-    </script>
-
-    <script>
-        
-    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

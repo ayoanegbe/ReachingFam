@@ -6,6 +6,7 @@
     ViewData["Title"] = "Pending Approval";
     int i = 1;
     ApprovalQueue approvalQueue = new();
+    var returnUrl = ViewBag.ReturnUrl;
 }
 
 <div class="container-fluid">
@@ -37,6 +38,7 @@
                                     <th>Name</th>
                                     <th>Change Date</th>
                                     <th>Changed By</th>
+                                    <th>Status</th>
                                     <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
@@ -49,7 +51,7 @@
                                         <td>@Html.DisplayFor(modelItem => item.ModuleName)</td>
                                         <td>@Html.DisplayFor(modelItem => item.ChangeDate)</td>
                                         <td>@Html.DisplayFor(modelItem => item.ChangedBy)</td>
-
+                                        <td><span class="badge @(item.Status == ApprovalStatus.Pending ? "badge-soft-warning" : (item.Status == ApprovalStatus.Approved ? "badge-soft-success" : "badge-soft-danger"))">@Html.DisplayFor(modelItem => item.Status)</span></td>
                                         <td class="text-end">
                                             <div class="dropdown d-inline-block">
                                                 <a class="dropdown-toggle arrow-none" id="dLabel11" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
@@ -58,7 +60,7 @@
                                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dLabel11">
                                                     <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#approve">Approve</a>
                                                     <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reject">Reject</a>
-                                                    <a class="dropdown-item" asp-action="ApprovalDetails" asp-route-id="@protector.Encode(item.ApprovalQueueId.ToString())">View Details</a>
+                                                    <a class="dropdown-item" asp-action="ApprovalDetails" asp-route-id="@protector.Encode(item.ApprovalQueueId.ToString())" asp-route-returnUrl="@protector.Encode(ViewBag.ReturnUrl)">View Details</a>
                                                 </div>
                                             </div>
                                         </td>
@@ -85,7 +87,7 @@
                 <h6 class="modal-title m-0" id="exampleModalDefaultLabel">Approve Changes</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div><!--end modal-header-->
-            <form asp-action="ApproveChange" method="post">
+            <form asp-action="ApproveChange" asp-route-id="@protector.Encode(approvalQueue.ApprovalQueueId.ToString())" asp-route-returnUrl="@protector.Encode(ViewBag.ReturnUrl)" method="post">
                 <input type="hidden" asp-for="@approvalQueue.ApprovalQueueId" />
                 <div class="alert alert-warning alert-dismissible" role="alert">
                     <strong>Are you sure you want to go ahead with this?</strong>
@@ -129,8 +131,9 @@
                 <h6 class="modal-title m-0" id="exampleModalDefaultLabel">Reject Changes</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div><!--end modal-header-->
-            <form asp-action="ApproveChange" method="post">
-                <input type="hidden" asp-for="@approvalQueue.ApprovalQueueId" />
+            <form id="formReject" onsubmit="return handleReject(this);" asp-action="RejectChange" asp-route-id="@protector.Encode(approvalQueue.ApprovalQueueId.ToString())" asp-route-returnUrl="@protector.Encode(ViewBag.ReturnUrl)" method="post">
+                @* <input type="hidden" id="approvalId" name="approvalId" asp-for="@approvalQueue.ApprovalQueueId" />
+                <input type="hidden" id="returnUrl" name="returnUrl" asp-for="@returnUrl" /> *@
                 <div class="alert alert-warning alert-dismissible" role="alert">
                     <strong>Are you sure you want to go ahead with this?</strong>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
@@ -157,8 +160,8 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label asp-for=@approvalQueue.RejectionReason></label>
-                                <textarea class="form-control" rows="5" asp-for=@approvalQueue.RejectionReason required></textarea>
+                                <label asp-for=@approvalQueue.RejectionReason>Rejection Reason</label>
+                                <textarea class="form-control" rows="5" id="rejectionReason" name="rejectionReason" asp-for=@approvalQueue.RejectionReason required></textarea>
                             </div>
                         </div>
                     </div>

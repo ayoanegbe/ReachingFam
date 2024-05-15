@@ -301,4 +301,38 @@ function handleNonFood(cb) {
     }
 }
 
+let frmReject = document.getElementById("formReject");
+frmReject.addEventListener("submit", handleReject);
+
+function handleReject(event) {
+
+    event.preventDefault();
+
+    document.getElementById("approvalId").value = _encryptAES(JSON.stringify(document.getElementById("approvalId").value));
+    document.getElementById("rejectionReason").value = _encryptAES(JSON.stringify(document.getElementById("rejectionReason").value));
+    document.getElementById("returnUrl").value = _encryptAES(JSON.stringify(document.getElementById("returnUrl").value));
+
+    //let data = {
+    //    approvalId: approvalId,
+    //    rejectionReason: rejectionReason,
+    //    returnUrl: returnUrl
+    //};
+
+    alert(document.getElementById("rejectionReason").value);
+    return false;
+    //jQuery.ajax({
+    //    method: 'POST',
+    //    URL: '/ProcessManagement/RejectChange',
+    //    data: data,
+    //    cache: true,
+    //    dataType: "application/json; charset=utf-8",
+    //    success: function () {
+    //        alert("response");
+    //    }
+    //});
+
+}
+
+
+
 

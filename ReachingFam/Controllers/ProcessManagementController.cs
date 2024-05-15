@@ -1125,23 +1125,29 @@ namespace ReachingFam.Controllers
 
         public async Task<IActionResult> PendingApprovals()
         {
-            return View(await _context.Approvals.OrderByDescending(x => x.ApprovalQueueId).ToListAsync());
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+
+            return View(await _context.Approvals.Where(x => x.Status == ApprovalStatus.Pending).OrderByDescending(x => x.ApprovalQueueId).ToListAsync());
         }
 
         public async Task<IActionResult> ItemsForApproval()
         {
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+
             return View(await _context.Approvals.OrderByDescending(x => x.ApprovalQueueId).ToListAsync());
         }
 
         [HttpPost]
         public async Task<IActionResult> ItemsForApproval(DateRangeViewModel dateRangeView)
         {
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+
             return View(await _context.Approvals.Where(x => x.ChangeDate >= dateRangeView.StartDate && x.ChangeDate >= dateRangeView.EndDate).OrderByDescending(x => x.ApprovalQueueId).ToListAsync());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ApproveChange(string id)
+        public async Task<IActionResult> ApproveChange(string id, string returnUrl = null)
         {
             if (id == null)
             {
@@ -1170,13 +1176,21 @@ namespace ReachingFam.Controllers
             _context.Update(approvalQueue);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(ItemsForApproval)); ;
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            return RedirectToLocal(retUrl);
         }
 
+        //TODO: fix rejection reason encryption
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RejectChange(string id, [Bind("RejectionReason")] ApprovalQueue approval)
+        public async Task<IActionResult> RejectChange(string id, string rejectionReason, string returnUrl = null)
         {
+
             if (id == null)
             {
                 //Not Found
@@ -1199,16 +1213,28 @@ namespace ReachingFam.Controllers
 
             approvalQueue.Status = ApprovalStatus.Declined;
             approvalQueue.RejectedBy = user.UserName;
-            approvalQueue.RejectionReason = approval.RejectionReason;
+            approvalQueue.RejectionReason = rejectionReason;
             approvalQueue.RejectionDate = DateTime.Now;
 
             _context.Update(approvalQueue);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(ItemsForApproval)); ;
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            return RedirectToLocal(retUrl);
         }
 
-        public async Task<IActionResult> ApprovalDetails(string id) 
+        [HttpGet]
+        public void RejectChange(string approvalId)
+        {
+            return;
+        }
+
+        public async Task<IActionResult> ApprovalDetails(string id, string returnUrl = null) 
         {
             if (id == null)
             {
@@ -1228,7 +1254,13 @@ namespace ReachingFam.Controllers
                 return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
             }
 
-            ApprovalObject approvalObject = new() { OldValue = approvalQueue.OldValue, NewValue = approvalQueue.NewValue };
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            ApprovalObject approvalObject = new() { OldValue = approvalQueue.OldValue, NewValue = approvalQueue.NewValue, ReturnUrl = retUrl };
             string serializedObj = JsonConvert.SerializeObject(approvalObject);
             var encrptedObj = _protector.Encode(serializedObj);
 
@@ -1279,6 +1311,7 @@ namespace ReachingFam.Controllers
 
             ViewData["oldValue"] = oldValue;
             ViewData["newValue"] = newValue;
+            ViewData["ReturnUrl"] = approvalObject.ReturnUrl;
 
             return View();
         }
@@ -1302,6 +1335,7 @@ namespace ReachingFam.Controllers
 
             ViewData["oldValue"] = oldValue;
             ViewData["newValue"] = newValue;
+            ViewData["ReturnUrl"] = approvalObject.ReturnUrl;
 
             return View();
         }
@@ -1331,6 +1365,7 @@ namespace ReachingFam.Controllers
 
             ViewData["oldValue"] = oldValue;
             ViewData["newValue"] = newValue;
+            ViewData["ReturnUrl"] = approvalObject.ReturnUrl;
 
             return View();
         }
@@ -1360,6 +1395,7 @@ namespace ReachingFam.Controllers
 
             ViewData["oldValue"] = oldValue;
             ViewData["newValue"] = newValue;
+            ViewData["ReturnUrl"] = approvalObject.ReturnUrl;
 
             return View();
         }
@@ -1383,6 +1419,7 @@ namespace ReachingFam.Controllers
 
             ViewData["oldValue"] = oldValue;
             ViewData["newValue"] = newValue;
+            ViewData["ReturnUrl"] = approvalObject.ReturnUrl;
 
             return View();
         }
@@ -1412,6 +1449,7 @@ namespace ReachingFam.Controllers
 
             ViewData["oldValue"] = oldValue;
             ViewData["newValue"] = newValue;
+            ViewData["ReturnUrl"] = approvalObject.ReturnUrl;
 
             return View();
         }
@@ -1441,6 +1479,7 @@ namespace ReachingFam.Controllers
 
             ViewData["oldValue"] = oldValue;
             ViewData["newValue"] = newValue;
+            ViewData["ReturnUrl"] = approvalObject.ReturnUrl;
 
             return View();
         }
@@ -1464,6 +1503,7 @@ namespace ReachingFam.Controllers
 
             ViewData["oldValue"] = oldValue;
             ViewData["newValue"] = newValue;
+            ViewData["ReturnUrl"] = approvalObject.ReturnUrl;
 
             return View();
         }      
@@ -1484,6 +1524,18 @@ namespace ReachingFam.Controllers
             }
 
             return (filePath, thumbnailPath, message);
+        }
+
+        private IActionResult RedirectToLocal(string returnUrl)
+        {
+            if (Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            else
+            {
+                return RedirectToAction(nameof(HomeController.Index), "Home");
+            }
         }
     }
 }
