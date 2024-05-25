@@ -12,7 +12,7 @@ namespace ReachingFam.Core.Models.ReachingFamViewModels
         [Display(Name = "Report Date")]
         public DateTime ReportDate { get; set; }
         
-        public double TotalHamperWeight { get; set; }
+        public decimal TotalHamperWeight { get; set; }
         public int TotalFamilySize { get; set; }
         public int TotalSeniors { get; set; }
         public int TotalAdults { get; set; }

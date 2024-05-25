@@ -1,0 +1,26 @@
+Name,Symbol,Description
+Pieces,pcs,Individual countable items
+Kilograms,kg,Weight measurement in the metric system
+Grams,g,Smaller weight measurement in the metric system
+Tons,t,Large weight measurement in the metric system
+Pounds,lb,Weight measurement in the imperial system
+Ounces,oz,Smaller weight measurement in the imperial system
+Liters,L,Volume measurement in the metric system
+Milliliters,mL,Smaller volume measurement in the metric system
+Cubic Meters,m³,Volume measurement for larger quantities
+Gallons,gal,Volume measurement in the imperial system
+Quarts,qt,Smaller volume measurement in the imperial system
+Pints,pt,Smaller volume measurement in the imperial system
+Fluid Ounces,fl oz,Small volume measurement in the imperial system
+Meters,m,Length measurement in the metric system
+Centimeters,cm,Smaller length measurement in the metric system
+Millimeters,mm,Even smaller length measurement in the metric system
+Inches,in,Length measurement in the imperial system
+Feet,ft,Larger length measurement in the imperial system
+Yards,yd,Even larger length measurement in the imperial system
+Dozens,doz,Count measurement for items sold in groups of twelve
+Boxes,box,Count or volume measurement for items in boxes
+Pallets,pallet,Count measurement for items on pallets
+Rolls,roll,Count measurement for items in rolls
+Bags,bag,Count or volume measurement for items in bags
+Packets,pkt,Count measurement for items in packets

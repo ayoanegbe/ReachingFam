@@ -12,8 +12,8 @@ using ReachingFam.Core.Data;
 namespace ReachingFam.Core.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240419223131_Update5")]
-    partial class Update5
+    [Migration("20240518045903_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -243,6 +243,83 @@ namespace ReachingFam.Core.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("ReachingFam.Core.Models.ApprovalNotification", b =>
+                {
+                    b.Property<int>("NotificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ReadDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("NotificationId");
+
+                    b.ToTable("ApprovalNotifications");
+                });
+
+            modelBuilder.Entity("ReachingFam.Core.Models.ApprovalQueue", b =>
+                {
+                    b.Property<int>("ApprovalQueueId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ApprovalQueueId"));
+
+                    b.Property<int>("Action")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ApprovedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ApprovedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ChangeDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ChangedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ModuleName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NewValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RejectedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RejectionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TableName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ApprovalQueueId");
+
+                    b.ToTable("Approvals");
+                });
+
             modelBuilder.Entity("ReachingFam.Core.Models.Donor", b =>
                 {
                     b.Property<int>("DonorId")
@@ -304,18 +381,29 @@ namespace ReachingFam.Core.Migrations
                     b.Property<DateTime?>("DateUpdated")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Disability")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MessageOptions")
+                        .HasColumnType("int");
 
                     b.Property<string>("OtherNames")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Phone")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UpdatedBy")
@@ -324,6 +412,81 @@ namespace ReachingFam.Core.Migrations
                     b.HasKey("FamilyId");
 
                     b.ToTable("Families");
+                });
+
+            modelBuilder.Entity("ReachingFam.Core.Models.FoodItem", b =>
+                {
+                    b.Property<int>("FoodItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FoodItemId"));
+
+                    b.Property<string>("AddedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("HasOption")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("InStock")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ItemCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ItemType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("FoodItemId");
+
+                    b.HasIndex("ItemCategoryId");
+
+                    b.ToTable("FoodItems");
+                });
+
+            modelBuilder.Entity("ReachingFam.Core.Models.FoodItemOption", b =>
+                {
+                    b.Property<int>("FoodItemOptionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FoodItemOptionId"));
+
+                    b.Property<string>("AddedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FoodItemId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Option")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("FoodItemOptionId");
+
+                    b.HasIndex("FoodItemId");
+
+                    b.ToTable("FoodItemOptions");
                 });
 
             modelBuilder.Entity("ReachingFam.Core.Models.Hamper", b =>
@@ -339,6 +502,9 @@ namespace ReachingFam.Core.Migrations
 
                     b.Property<int?>("Adults")
                         .HasColumnType("int");
+
+                    b.Property<bool>("AgreeToOneHamper")
+                        .HasColumnType("bit");
 
                     b.Property<int?>("Children")
                         .HasColumnType("int");
@@ -367,20 +533,77 @@ namespace ReachingFam.Core.Migrations
                     b.Property<int>("FamilySize")
                         .HasColumnType("int");
 
+                    b.Property<string>("FilePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Frozen")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("FrozenWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("NonFood")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("NonFoodWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("NonPerishables")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("NonPerishablesWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("Perishables")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("PerishablesWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int?>("Seniors")
                         .HasColumnType("int");
+
+                    b.Property<string>("ThumbnailPath")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double>("Weight")
-                        .HasColumnType("float");
+                    b.Property<decimal>("Weight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("HamperId");
 
                     b.HasIndex("FamilyId");
 
                     b.ToTable("Hampers");
+                });
+
+            modelBuilder.Entity("ReachingFam.Core.Models.HamperItem", b =>
+                {
+                    b.Property<int>("HamperItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HamperItemId"));
+
+                    b.Property<int>("FoodItemId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("HamperItemId");
+
+                    b.HasIndex("FoodItemId");
+
+                    b.ToTable("HamperItems");
                 });
 
             modelBuilder.Entity("ReachingFam.Core.Models.InwardItem", b =>
@@ -406,11 +629,47 @@ namespace ReachingFam.Core.Migrations
                     b.Property<int>("DonorId")
                         .HasColumnType("int");
 
-                    b.Property<double?>("TotalWaste")
-                        .HasColumnType("float");
+                    b.Property<string>("FilePath")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<double>("TotalWeight")
-                        .HasColumnType("float");
+                    b.Property<bool>("Frozen")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("FrozenWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("NonFood")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("NonFoodWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("NonPerishables")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("NonPerishablesWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("Perishables")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("PerishablesWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ThumbnailPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("TotalWaste")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
@@ -420,6 +679,25 @@ namespace ReachingFam.Core.Migrations
                     b.HasIndex("DonorId");
 
                     b.ToTable("InwardItems");
+                });
+
+            modelBuilder.Entity("ReachingFam.Core.Models.ItemCategory", b =>
+                {
+                    b.Property<int>("ItemCategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ItemCategoryId"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ItemCategoryId");
+
+                    b.ToTable("ItemCategory");
                 });
 
             modelBuilder.Entity("ReachingFam.Core.Models.Partner", b =>
@@ -475,6 +753,12 @@ namespace ReachingFam.Core.Migrations
                     b.Property<string>("AddedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("Adults")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Children")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Collected")
                         .HasColumnType("bit");
 
@@ -493,20 +777,97 @@ namespace ReachingFam.Core.Migrations
                     b.Property<DateTime?>("DateUpdated")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("FilePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Frozen")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("FrozenWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("NonFood")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("NonFoodWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("NonPerishables")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("NonPerishablesWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("NumberOfFamilies")
+                        .HasColumnType("int");
+
                     b.Property<int>("PartnerId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("Perishables")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("PerishablesWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("Seniors")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ThumbnailPath")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double>("Weight")
-                        .HasColumnType("float");
+                    b.Property<decimal>("Weight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("PartnerGiveOutId");
 
                     b.HasIndex("PartnerId");
 
                     b.ToTable("PartnerGiveOuts");
+                });
+
+            modelBuilder.Entity("ReachingFam.Core.Models.PhotoSpeak", b =>
+                {
+                    b.Property<int>("PhotoSpeakId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PhotoSpeakId"));
+
+                    b.Property<string>("AddedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FilePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PhotoSpeakId");
+
+                    b.ToTable("PhotoSpeaks");
                 });
 
             modelBuilder.Entity("ReachingFam.Core.Models.SignIn", b =>
@@ -526,8 +887,9 @@ namespace ReachingFam.Core.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<double>("HoursWorked")
-                        .HasColumnType("float");
+                    b.Property<decimal>("HoursWorked")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(max)");
@@ -583,6 +945,129 @@ namespace ReachingFam.Core.Migrations
                     b.ToTable("SmtpSettings");
                 });
 
+            modelBuilder.Entity("ReachingFam.Core.Models.Stock", b =>
+                {
+                    b.Property<int>("StockId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StockId"));
+
+                    b.Property<string>("AddedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FoodItemId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("ReservedQuantity")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("UnitOfMeasureId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("StockId");
+
+                    b.HasIndex("FoodItemId");
+
+                    b.HasIndex("UnitOfMeasureId");
+
+                    b.ToTable("Stocks");
+                });
+
+            modelBuilder.Entity("ReachingFam.Core.Models.StockHistory", b =>
+                {
+                    b.Property<int>("StockHistoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StockHistoryId"));
+
+                    b.Property<string>("AddedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("AdjustedQuantity")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FoodItemId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("TransactionType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("StockHistoryId");
+
+                    b.HasIndex("FoodItemId");
+
+                    b.ToTable("StockHistories");
+                });
+
+            modelBuilder.Entity("ReachingFam.Core.Models.UnitOfMeasure", b =>
+                {
+                    b.Property<int>("UnitOfMeasureId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UnitOfMeasureId"));
+
+                    b.Property<string>("AddedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Symbol")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UnitOfMeasureId");
+
+                    b.ToTable("UnitOfMeasures");
+                });
+
             modelBuilder.Entity("ReachingFam.Core.Models.VolunteerGiveOut", b =>
                 {
                     b.Property<int>("VolunteerGiveOutId")
@@ -606,14 +1091,43 @@ namespace ReachingFam.Core.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Frozen")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("FrozenWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("NonFood")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("NonFoodWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("NonPerishables")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("NonPerishablesWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("Perishables")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("PerishablesWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<double>("Weight")
-                        .HasColumnType("float");
+                    b.Property<decimal>("Weight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("VolunteerGiveOutId");
 
@@ -642,14 +1156,43 @@ namespace ReachingFam.Core.Migrations
                     b.Property<DateTime?>("DateUpdated")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("Frozen")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("FrozenWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("NonFood")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("NonFoodWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("NonPerishables")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("NonPerishablesWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Perishables")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("PerishablesWeight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double>("Weight")
-                        .HasColumnType("float");
+                    b.Property<decimal>("Weight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("WasteId");
 
@@ -707,6 +1250,28 @@ namespace ReachingFam.Core.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ReachingFam.Core.Models.FoodItem", b =>
+                {
+                    b.HasOne("ReachingFam.Core.Models.ItemCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("ItemCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("ReachingFam.Core.Models.FoodItemOption", b =>
+                {
+                    b.HasOne("ReachingFam.Core.Models.FoodItem", "FoodItem")
+                        .WithMany()
+                        .HasForeignKey("FoodItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FoodItem");
+                });
+
             modelBuilder.Entity("ReachingFam.Core.Models.Hamper", b =>
                 {
                     b.HasOne("ReachingFam.Core.Models.Family", "Family")
@@ -716,6 +1281,17 @@ namespace ReachingFam.Core.Migrations
                         .IsRequired();
 
                     b.Navigation("Family");
+                });
+
+            modelBuilder.Entity("ReachingFam.Core.Models.HamperItem", b =>
+                {
+                    b.HasOne("ReachingFam.Core.Models.FoodItem", "FoodItem")
+                        .WithMany()
+                        .HasForeignKey("FoodItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FoodItem");
                 });
 
             modelBuilder.Entity("ReachingFam.Core.Models.InwardItem", b =>
@@ -738,6 +1314,36 @@ namespace ReachingFam.Core.Migrations
                         .IsRequired();
 
                     b.Navigation("Partner");
+                });
+
+            modelBuilder.Entity("ReachingFam.Core.Models.Stock", b =>
+                {
+                    b.HasOne("ReachingFam.Core.Models.FoodItem", "FoodItem")
+                        .WithMany()
+                        .HasForeignKey("FoodItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ReachingFam.Core.Models.UnitOfMeasure", "UnitOfMeasure")
+                        .WithMany()
+                        .HasForeignKey("UnitOfMeasureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FoodItem");
+
+                    b.Navigation("UnitOfMeasure");
+                });
+
+            modelBuilder.Entity("ReachingFam.Core.Models.StockHistory", b =>
+                {
+                    b.HasOne("ReachingFam.Core.Models.FoodItem", "FoodItem")
+                        .WithMany()
+                        .HasForeignKey("FoodItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FoodItem");
                 });
 
             modelBuilder.Entity("ReachingFam.Core.Models.VolunteerGiveOut", b =>

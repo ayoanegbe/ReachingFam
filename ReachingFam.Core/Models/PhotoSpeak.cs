@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ReachingFam.Core.Models
 {
-    public class PhotoSpeak
+    public class PhotoSpeak : BaseEntity
     {
         [Key]
         public int PhotoSpeakId { get; set; }
@@ -16,9 +16,5 @@ namespace ReachingFam.Core.Models
         [Required]
         public string Description { get; set; }
         public string FilePath { get; set; }
-        [Display(Name = "Date Added")]
-        public DateTime DateAdded { get; set; } = DateTime.Now;
-        [Display(Name = "Added By")]
-        public string AddedBy { get; set; }
     }
 }

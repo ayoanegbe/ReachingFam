@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using DnsClient.Internal;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using ReachingFam.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Globalization;
+using System.Reflection;
 
 namespace ReachingFam.Core.Data
 {
@@ -14,17 +15,21 @@ namespace ReachingFam.Core.Data
         public static async Task Initialize(ApplicationDbContext context,
                                             UserManager<ApplicationUser> userManager,
                                             RoleManager<IdentityRole> roleManager,
-                                            ILogger<DbInitializer> logger)
+                                            ILogger<DbInitializer> logger,
+                                            IWebHostEnvironment environment)
         {
             context.Database.EnsureCreated();
 
-            // Look for any users.
-            if (context.Users.Any())
+            if (!context.UnitOfMeasures.Any())
             {
-                return; // DB has been seeded
+                await SeedUOM(context, environment, logger);
             }
 
-            await CreateDefaultUserAndRoleForApplication(userManager, roleManager, logger);
+            if (!context.Users.Any())
+            {
+                await CreateDefaultUserAndRoleForApplication(userManager, roleManager, logger);
+            }
+            
         }
 
         private static async Task CreateDefaultUserAndRoleForApplication(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, ILogger<DbInitializer> logger)
@@ -115,7 +120,7 @@ namespace ReachingFam.Core.Data
             }
         }
 
-        public static async Task AddDefaultRoles(RoleManager<IdentityRole> roleManager, ILogger<DbInitializer> logger)
+        private static async Task AddDefaultRoles(RoleManager<IdentityRole> roleManager, ILogger<DbInitializer> logger)
         {
             var admin = "Administrator";
             logger.LogInformation($"Create the role '{admin}' for application");
@@ -135,6 +140,49 @@ namespace ReachingFam.Core.Data
                 logger.LogDebug($"Created the role '{user}' successfully");
             }
 
+        }
+
+        private static async Task SeedUOM(ApplicationDbContext context, IWebHostEnvironment environment, ILogger<DbInitializer> logger)
+        {
+            try
+            {
+                var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+                {
+                    HasHeaderRecord = true,
+                };
+
+                string path = Path.Combine(environment.WebRootPath, "data");
+
+                string file = "UnitOfMeasure.csv";
+
+                var filePath = Path.Combine(path, file);
+
+                using (var reader = new StreamReader(filePath))
+                using (var csv = new CsvReader(reader, config))
+                {
+                    var records = csv.GetRecords<UOMCSVMap>();
+                    foreach (UOMCSVMap record in records)
+                    {
+                        UnitOfMeasure unitOfMeasure = new()
+                        {
+                            Name = record.Name,
+                            Symbol = record.Symbol,
+                            Description = record.Description,
+                            DateAdded = DateTime.Now,
+                            AddedBy = "System"
+                        };
+
+                        await context.AddAsync(unitOfMeasure);
+                    }
+                }
+
+                await context.SaveChangesAsync();
+            }
+            catch (Exception ex) 
+            {
+                logger.LogDebug($"An error has occurred when trying to create UnitOfMeasure table => {ex}");
+            }
+            
         }
 
         private static string GetIdentityErrorsInCommaSeperatedList(IdentityResult ir)

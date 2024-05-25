@@ -20,27 +20,27 @@ namespace ReachingFam.Core.Models.ReachingFamViewModels
         [Required]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:N3}")]
         [Display(Name = "Total Weight (lbs)")]
-        public double TotalWeight { get; set; }
+        public decimal TotalWeight { get; set; }
         [Display(Name = "Non Perishables")]
         public bool NonPerishables { get; set; } = false;
         [Display(Name = "NP Weight")]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:N3}")]
-        public double? NonPerishablesWeight { get; set; }
+        public decimal? NonPerishablesWeight { get; set; }
         public bool Perishables { get; set; } = false;
         [Display(Name = "P Weight")]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:N3}")]
-        public double? PerishablesWeight { get; set; }
+        public decimal? PerishablesWeight { get; set; }
         public bool Frozen { get; set; } = false;
         [Display(Name = "F Weight")]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:N3}")]
-        public double? FrozenWeight { get; set; }
+        public decimal? FrozenWeight { get; set; }
         [Display(Name = "Non Food")]
         public bool NonFood { get; set; } = false;
         [Display(Name = "NF Weight")]
         [DisplayFormat(ApplyFormatInEditMode = true, DataFormatString = "{0:N3}")]
-        public double? NonFoodWeight { get; set; }
+        public decimal? NonFoodWeight { get; set; }
         [Display(Name = "Total Waste (lbs)")]
-        public double? TotalWaste { get; set; }
+        public decimal? TotalWaste { get; set; }
         public IFormFile File { get; set; }
     }
 }

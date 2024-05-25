@@ -24,7 +24,7 @@ namespace ReachingFam.Core.Models.ReachingFamViewModels
         public DateTime CollectionTime { get; set; }
         [Required]
         [Display(Name = "Total Weight")]
-        public double Weight { get; set; }
+        public decimal Weight { get; set; }
         [Required]
         [Display(Name = "Family Size")]
         public int FamilySize { get; set; }
@@ -34,17 +34,17 @@ namespace ReachingFam.Core.Models.ReachingFamViewModels
         [Display(Name = "Non Perishables")]
         public bool NonPerishables { get; set; } = false;
         [Display(Name = "NP Weight")]
-        public double? NonPerishablesWeight { get; set; }
+        public decimal? NonPerishablesWeight { get; set; }
         public bool Perishables { get; set; } = false;
         [Display(Name = "P Weight")]
-        public double? PerishablesWeight { get; set; }
+        public decimal? PerishablesWeight { get; set; }
         public bool Frozen { get; set; } = false;
         [Display(Name = "F Weight")]
-        public double? FrozenWeight { get; set; }
+        public decimal? FrozenWeight { get; set; }
         [Display(Name = "Non Food")]
         public bool NonFood { get; set; } = false;
         [Display(Name = "NF Weight")]
-        public double? NonFoodWeight { get; set; }
+        public decimal? NonFoodWeight { get; set; }
         [Display(Name = "Collected?")]
         public bool Collected { get; set; } = false;
         [Display(Name = "Date Collected")]

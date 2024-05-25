@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ReachingFam.Core.Data;
@@ -163,15 +164,15 @@ namespace ReachingFam.Controllers
             var oldValue = JsonConvert.SerializeObject(await _context.Donors.FirstOrDefaultAsync(x => x.DonorId == donor.DonorId));
             var newValue = JsonConvert.SerializeObject(donor);
 
-            string retUrl = string.Empty;
-            if (returnUrl != null)
-            {
-                retUrl = _resolverService.ResolveString(returnUrl);
-            }
+            //string retUrl = string.Empty;
+            //if (returnUrl != null)
+            //{
+            //    retUrl = _resolverService.ResolveString(returnUrl);
+            //}
 
             if (await _approvalService.UpdateApprovalQueue(donor.GetType().Name, "Donor", UpdateAction.Update, oldValue, newValue, user.UserName))
             {
-                return RedirectToAction(nameof(Confirmation), new { url = retUrl });
+                return RedirectToAction(nameof(Confirmation), new { url = returnUrl });
             }
             else
             {
@@ -294,11 +295,11 @@ namespace ReachingFam.Controllers
                 return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
             }
 
-            string retUrl = string.Empty;
-            if (returnUrl != null)
-            {
-                retUrl = _resolverService.ResolveString(returnUrl);
-            }
+            //string retUrl = string.Empty;
+            //if (returnUrl != null)
+            //{
+            //    retUrl = _resolverService.ResolveString(returnUrl);
+            //}
 
             var user = await _userManager.GetUserAsync(User);
 
@@ -319,7 +320,7 @@ namespace ReachingFam.Controllers
 
             if (await _approvalService.UpdateApprovalQueue(partner.GetType().Name, "Partner", UpdateAction.Update, oldValue, newValue, user.UserName))
             {                                
-                return RedirectToAction(nameof(Confirmation), new { url = retUrl });
+                return RedirectToAction(nameof(Confirmation), new { url = returnUrl });
             }
             else
             {
@@ -333,8 +334,14 @@ namespace ReachingFam.Controllers
 
         public IActionResult Confirmation(string url)
         {
+            string retUrl = string.Empty;
+            if (url != null)
+            {
+                retUrl = _resolverService.ResolveString(url);
+            }
+
             ViewData["Approval"] = "Your changes have been forwarded for approval";
-            ViewData["ReturnUrl"] = url;
+            ViewData["ReturnUrl"] = retUrl;
 
             return View();
         }
@@ -450,11 +457,11 @@ namespace ReachingFam.Controllers
                 return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
             }
 
-            string retUrl = string.Empty;
-            if (returnUrl != null)
-            {
-                retUrl = _resolverService.ResolveString(returnUrl);
-            }
+            //string retUrl = string.Empty;
+            //if (returnUrl != null)
+            //{
+            //    retUrl = _resolverService.ResolveString(returnUrl);
+            //}
 
             var user = await _userManager.GetUserAsync(User);
 
@@ -467,6 +474,8 @@ namespace ReachingFam.Controllers
                 Email = familyView.Email,
                 Phone = familyView.Phone,                
                 Code = familyView.Code,
+                UpdatedBy = user.UserName,
+                DateUpdated = DateTime.Now
             };
 
             var oldValue = JsonConvert.SerializeObject(await _context.Families.FirstOrDefaultAsync(x => x.FamilyId == family.FamilyId));
@@ -474,7 +483,7 @@ namespace ReachingFam.Controllers
 
             if (await _approvalService.UpdateApprovalQueue(family.GetType().Name, "Family", UpdateAction.Update, oldValue, newValue, user.UserName))
             {
-                return RedirectToAction(nameof(Confirmation), new { url = retUrl });
+                return RedirectToAction(nameof(Confirmation), new { url = returnUrl });
             }
             else
             {
@@ -484,8 +493,140 @@ namespace ReachingFam.Controllers
             }
 
             return View(familyView);
-        }
-       
+        }        
 
+        public async Task<IActionResult> ListUOMs()
+        {
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+
+            return View(await _context.UnitOfMeasures.ToListAsync());
+        }
+
+        public IActionResult AddUOM()
+        {
+            return View(new UnitOfMeasureViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddUOM([Bind("Name,Symbol,Description")] UnitOfMeasureViewModel unitOfMeasureView)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            UnitOfMeasure unitOfMeasure = new()
+            {
+                Name = unitOfMeasureView.Name,
+                Symbol = unitOfMeasureView.Symbol,
+                Description = unitOfMeasureView.Description,
+                AddedBy = user.UserName,
+                DateAdded = DateTime.Now
+            };
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    await _context.AddAsync(unitOfMeasure);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(ListUOMs));
+                }
+                else
+                {
+                    ViewBag.Message = "Unable to save changes. " +
+                        "Try again, and if the problem persists, " +
+                        "see your system administrator.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, ex, $"An error has occurred when trying to write into {unitOfMeasure.GetType().Name} table");
+            }
+
+            return View(unitOfMeasureView);
+        }
+
+        public async Task<IActionResult> EditUOM(string id, string returnUrl = null)
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var unitOfMeasure = await _context.UnitOfMeasures.FirstOrDefaultAsync(x => x.UnitOfMeasureId == num);
+            if (unitOfMeasure == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            UnitOfMeasureViewModel unitOfMeasureView = new()
+            {
+                Name = unitOfMeasure.Name,
+                Symbol = unitOfMeasure.Symbol,
+                Description = unitOfMeasure.Description,    
+            };
+
+            ViewData["ReturnUrl"] = retUrl;
+
+            return View(unitOfMeasureView);
+
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditUOM(string id, [Bind("UnitOfMeasureId,Name,Symbol,Description")] UnitOfMeasureViewModel unitOfMeasureView, string returnUrl = null)
+        {
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            if (num != unitOfMeasureView.UnitOfMeasureId)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            UnitOfMeasure unitOfMeasure = new()
+            {
+                UnitOfMeasureId = unitOfMeasureView.UnitOfMeasureId,
+                Name = unitOfMeasureView.Name,
+                Symbol = unitOfMeasureView.Symbol,
+                Description = unitOfMeasureView.Description,
+                UpdatedBy = user.UserName,
+                DateUpdated = DateTime.Now
+            };
+
+            var oldValue = JsonConvert.SerializeObject(await _context.UnitOfMeasures.FirstOrDefaultAsync(x => x.UnitOfMeasureId == unitOfMeasure.UnitOfMeasureId));
+            var newValue = JsonConvert.SerializeObject(unitOfMeasure);
+
+            if (await _approvalService.UpdateApprovalQueue(unitOfMeasure.GetType().Name, "UnitOfMeasure", UpdateAction.Update, oldValue, newValue, user.UserName))
+            {
+                return RedirectToAction(nameof(Confirmation), new { url = returnUrl });
+            }
+            else
+            {
+                ViewBag.Message = "Unable to save changes. " +
+                    "Try again, and if the problem persists, " +
+                    "see your system administrator.";
+            }
+
+            return View(unitOfMeasureView);
+        }
     }
 }

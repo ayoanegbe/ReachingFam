@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ReachingFam.Core.Models
 {
-    public class Partner
+    public class Partner : BaseEntity
     {
         [Key]
         public int PartnerId { get; set; }
@@ -24,13 +24,6 @@ namespace ReachingFam.Core.Models
         [DataType(DataType.PhoneNumber)]
         [Display(Name = "Contact Phone")]
         public string ContactPhone { get; set; }
-        [Display(Name = "Date Added")]
-        public DateTime DateAdded { get; set; } = DateTime.Now;
-        [Display(Name = "Date Updated")]
-        public DateTime? DateUpdated { get; set; }
-        [Display(Name = "Added By")]
-        public string AddedBy { get; set; }
-        [Display(Name = "Updated By")]
-        public string UpdatedBy { get; set; }
+        
     }
 }

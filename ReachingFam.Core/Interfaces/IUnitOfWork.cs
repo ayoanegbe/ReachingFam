@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace ReachingFam.Core.Interfaces
 {
-    public interface IDeserializerInterface
+    public interface IUnitOfWork
     {
-        T Deserialize<T>(string serializedData) where T : class;
+        Task<int> SaveChangesAsync();
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }
 }

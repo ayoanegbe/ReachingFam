@@ -14,6 +14,7 @@ using ReachingFam.Core.Models.DataViewModels;
 using ReachingFam.Core.Models.ReachingFamViewModels;
 using ReachingFam.Core.Services;
 using System.Linq;
+using System.Transactions;
 
 namespace ReachingFam.Controllers
 {
@@ -27,7 +28,8 @@ namespace ReachingFam.Controllers
         RoleManager<IdentityRole> roleManager,
         IApprovalService approvalService,
         IFileService fileService,
-        IResolverService resolverService
+        IResolverService resolverService,
+        IStockLevelRepository stockLevelRepository
             ) : Controller
     {
         private readonly ApplicationDbContext _context = context;
@@ -39,6 +41,7 @@ namespace ReachingFam.Controllers
         private readonly IApprovalService _approvalService = approvalService;
         private readonly IFileService _fileService = fileService;
         private readonly IResolverService _resolverService = resolverService;
+        private readonly IStockLevelRepository _stockLevelRepository = stockLevelRepository;
 
         public async Task<IActionResult> InwardItemsList()
         {
@@ -64,7 +67,7 @@ namespace ReachingFam.Controllers
             string message = string.Empty;
             string thumbnailPath = string.Empty;
 
-            (filePath, thumbnailPath, message) = await ProcessFile(inwardItemView.File, "images", "donors");
+            (filePath, thumbnailPath, message) = await _fileService.ProcessFile(inwardItemView.File, "images", "donors");
 
             if (message != "Success")
             {
@@ -78,7 +81,7 @@ namespace ReachingFam.Controllers
             {
                 DonorId = inwardItemView.DonorId,
                 CollectionDate = inwardItemView.CollectionDate,
-                TotalWeight = (double)totalWeight,
+                TotalWeight = (decimal)totalWeight,
                 NonPerishables = inwardItemView.NonPerishables,
                 NonPerishablesWeight = inwardItemView.NonPerishablesWeight,
                 Perishables = inwardItemView.Perishables,
@@ -192,7 +195,7 @@ namespace ReachingFam.Controllers
                 InwardItemId = inwardItemView.InwardItemId,
                 DonorId = inwardItemView.DonorId,
                 CollectionDate = inwardItemView.CollectionDate,
-                TotalWeight = (double)totalWeight,
+                TotalWeight = (decimal)totalWeight,
                 NonPerishables = inwardItemView.NonPerishables,
                 NonPerishablesWeight = inwardItemView.NonPerishablesWeight,
                 Perishables = inwardItemView.Perishables,
@@ -254,7 +257,7 @@ namespace ReachingFam.Controllers
             string message = string.Empty;
             string thumbnailPath = string.Empty;
 
-            (filePath, thumbnailPath, message) = await ProcessFile(hamperView.File, "images", "donors");
+            (filePath, thumbnailPath, message) = await _fileService.ProcessFile(hamperView.File, "images", "donors");
 
             if (message != "Success")
             {
@@ -285,7 +288,7 @@ namespace ReachingFam.Controllers
                 FamilyId = hamperView.FamilyId,
                 CollectionDate = hamperView.CollectionDate,
                 CollectionTime = hamperView.CollectionTime,
-                Weight = (double)totalWeight,
+                Weight = (decimal)totalWeight,
                 NonPerishables = hamperView.NonPerishables,
                 NonPerishablesWeight = hamperView.NonPerishablesWeight,
                 Perishables = hamperView.Perishables,
@@ -427,7 +430,7 @@ namespace ReachingFam.Controllers
                 FamilyId = hamperView.FamilyId,
                 CollectionDate = hamperView.CollectionDate,
                 CollectionTime = hamperView.CollectionTime,
-                Weight = (double)totalWeight,
+                Weight = (decimal)totalWeight,
                 NonPerishables = hamperView.NonPerishables,
                 NonPerishablesWeight = hamperView.NonPerishablesWeight,
                 Perishables = hamperView.Perishables,
@@ -494,7 +497,7 @@ namespace ReachingFam.Controllers
             string message = string.Empty;
             string thumbnailPath = string.Empty;
 
-            (filePath, thumbnailPath, message) = await ProcessFile(partnerGiveOutView.File, "images", "donors");
+            (filePath, thumbnailPath, message) = await _fileService.ProcessFile(partnerGiveOutView.File, "images", "donors");
 
             if (message != "Success")
             {
@@ -509,7 +512,7 @@ namespace ReachingFam.Controllers
                 PartnerId = partnerGiveOutView.PartnerId,
                 CollectionDate = partnerGiveOutView.CollectionDate,
                 CollectionTime = partnerGiveOutView.CollectionTime,
-                Weight = (double)totalWeight,
+                Weight = (decimal)totalWeight,
                 NonPerishables = partnerGiveOutView.NonPerishables,
                 NonPerishablesWeight = partnerGiveOutView.NonPerishablesWeight,
                 Perishables = partnerGiveOutView.Perishables,
@@ -627,7 +630,7 @@ namespace ReachingFam.Controllers
                 PartnerId = partnerGiveOutView.PartnerId,
                 CollectionDate = partnerGiveOutView.CollectionDate,
                 CollectionTime = partnerGiveOutView.CollectionTime,
-                Weight = (double)totalWeight,
+                Weight = (decimal)totalWeight,
                 NonPerishables = partnerGiveOutView.NonPerishables,
                 NonPerishablesWeight = partnerGiveOutView.NonPerishablesWeight,
                 Perishables = partnerGiveOutView.Perishables,
@@ -692,7 +695,7 @@ namespace ReachingFam.Controllers
             {
                 Email = volunteerGiveOutView.Email,
                 CollectionDate = volunteerGiveOutView.CollectionDate,
-                Weight = (double)totalWeight,
+                Weight = (decimal)totalWeight,
                 NonPerishables = volunteerGiveOutView.NonPerishables,
                 NonPerishablesWeight = volunteerGiveOutView.NonPerishablesWeight,
                 Perishables = volunteerGiveOutView.Perishables,
@@ -804,7 +807,7 @@ namespace ReachingFam.Controllers
                 VolunteerGiveOutId = volunteerGiveOutView.VolunteerGiveOutId,
                 Email = volunteerGiveOutView.Email,
                 CollectionDate = volunteerGiveOutView.CollectionDate,
-                Weight = (double)totalWeight,
+                Weight = (decimal)totalWeight,
                 NonPerishables = volunteerGiveOutView.NonPerishables,
                 NonPerishablesWeight = volunteerGiveOutView.NonPerishablesWeight,
                 Perishables = volunteerGiveOutView.Perishables,
@@ -851,7 +854,7 @@ namespace ReachingFam.Controllers
 
         public IActionResult AddWaste()
         {
-            return View( new WasteViewModel() { Date = DateTime.Today});
+            return View( new WasteViewModel() { Date = DateTime.Today });
         }
 
         [HttpPost]
@@ -865,7 +868,7 @@ namespace ReachingFam.Controllers
             Waste waste = new()
             {
                 Date = wasteView.Date,
-                Weight = (double)totalWeight,
+                Weight = (decimal)totalWeight,
                 NonPerishables = wasteView.NonPerishables,
                 NonPerishablesWeight = wasteView.NonPerishablesWeight,
                 Perishables = wasteView.Perishables,
@@ -973,7 +976,7 @@ namespace ReachingFam.Controllers
             {
                 WasteId = wasteView.WasteId,
                 Date = wasteView.Date,
-                Weight = (double)totalWeight,
+                Weight = (decimal)totalWeight,
                 NonPerishables = wasteView.NonPerishables,
                 NonPerishablesWeight = wasteView.NonPerishablesWeight,
                 Perishables = wasteView.Perishables,
@@ -1506,25 +1509,361 @@ namespace ReachingFam.Controllers
             ViewData["ReturnUrl"] = approvalObject.ReturnUrl;
 
             return View();
-        }      
+        }
 
-        private async Task<(string filePath, string thumbFilePath, string message)> ProcessFile(IFormFile file, string mainDirectory, string subDirectory)
+        public async Task<IActionResult> ListFoodItems()
         {
-            string filePath = string.Empty;
-            string message = string.Empty;
-            string thumbnailPath = string.Empty;
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
 
-            string[] allowedExtensions = ["jpeg", "jpg", "png"];
+            return View(await _context.FoodItems.OrderByDescending(x => x.FoodItemId).ToListAsync());
+        }
 
-            if (file != null)
+        public IActionResult AddFoodItem()
+        {
+            ViewData["ItemCategoryId"] = new SelectList(_context.ItemCategories, "ItemCategoryId", "Name");
+            ViewData["UnitOfMeasureId"] = new SelectList(_context.UnitOfMeasures, "UnitOfMeasureId", "Name");
+
+            return View(new FoodItemViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddFoodItem([Bind("Name,ItemType,ItemCategoryId,InStock,HasOption,ReorderLevel,UnitOfMeasureId")] FoodItemViewModel foodItemView)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            FoodItem foodItem = new()
             {
-                (filePath, message) = await _fileService.SaveFile(file, mainDirectory, subDirectory, allowedExtensions);
+                Name = foodItemView.Name,
+                ItemType = foodItemView.ItemType,
+                ItemCategoryId = foodItemView.ItemCategoryId,
+                InStock = foodItemView.InStock,
+                HasOption = foodItemView.HasOption,
+                ReorderLevel = foodItemView.ReorderLevel,
+                UnitOfMeasureId = foodItemView.UnitOfMeasureId,
+                AddedBy = user.UserName,
+                DateAdded = DateTime.Now
+            };
 
-                thumbnailPath = _fileService.FileResize(file.FileName, filePath, 100, 75);
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    await _context.AddAsync(foodItem);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(ListFoodItems));
+                }
+                else
+                {
+                    ViewBag.Message = "Unable to save changes. " +
+                        "Try again, and if the problem persists, " +
+                        "see your system administrator.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, ex, $"An error has occurred when trying to write into {foodItem.GetType().Name} table");
             }
 
-            return (filePath, thumbnailPath, message);
+            ViewData["ItemCategoryId"] = new SelectList(_context.ItemCategories, "ItemCategoryId", "Name");
+            ViewData["UnitOfMeasureId"] = new SelectList(_context.UnitOfMeasures, "UnitOfMeasureId", "Name");
+
+            return View(foodItemView);
         }
+
+        public async Task<IActionResult> EditFoodItem(string id, string returnUrl = null)
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var foodItem = await _context.FoodItems.FirstOrDefaultAsync(x => x.FoodItemId == num);
+            if (foodItem == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            FoodItemViewModel foodItemView = new()
+            {
+                FoodItemId = foodItem.FoodItemId,
+                Name = foodItem.Name,
+                ItemType = foodItem.ItemType,
+                ItemCategoryId = foodItem.ItemCategoryId,
+                InStock = foodItem.InStock,
+                HasOption = foodItem.HasOption,
+                ReorderLevel = foodItem.ReorderLevel,
+                UnitOfMeasureId = foodItem.UnitOfMeasureId,
+            };
+
+            ViewData["ReturnUrl"] = retUrl;
+            ViewData["ItemCategoryId"] = new SelectList(_context.ItemCategories, "ItemCategoryId", "Name", foodItemView.FoodItemId);
+            ViewData["UnitOfMeasureId"] = new SelectList(_context.UnitOfMeasures, "UnitOfMeasureId", "Name", foodItemView.FoodItemId);
+
+            return View(foodItemView);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditFoodItem(string id, [Bind("FoodItemId,Name,ItemType,ItemCategoryId,InStock,HasOption,ReorderLevel,UnitOfMeasureId")] FoodItemViewModel foodItemView, string returnUrl = null)
+        {
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            if (num != foodItemView.FoodItemId)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            FoodItem foodItem = new()
+            {
+                FoodItemId = foodItemView.FoodItemId,
+                Name = foodItemView.Name,
+                ItemType = foodItemView.ItemType,
+                ItemCategoryId = foodItemView.ItemCategoryId,
+                InStock = foodItemView.InStock,
+                HasOption = foodItemView.HasOption,
+                ReorderLevel = foodItemView.ReorderLevel,
+                UnitOfMeasureId = foodItemView.UnitOfMeasureId,
+                UpdatedBy = user.UserName,
+                DateUpdated = DateTime.Now
+            };
+
+            var oldValue = JsonConvert.SerializeObject(await _context.FoodItems.FirstOrDefaultAsync(x => x.FoodItemId == foodItem.FoodItemId));
+            var newValue = JsonConvert.SerializeObject(foodItem);
+
+            if (await _approvalService.UpdateApprovalQueue(foodItem.GetType().Name, "FoodItem", UpdateAction.Update, oldValue, newValue, user.UserName))
+            {
+                return RedirectToAction(nameof(Confirmation), new { url = returnUrl });
+            }
+            else
+            {
+                ViewBag.Message = "Unable to save changes. " +
+                    "Try again, and if the problem persists, " +
+                    "see your system administrator.";
+            }
+
+            ViewData["ItemCategoryId"] = new SelectList(_context.ItemCategories, "ItemCategoryId", "Name", foodItemView.FoodItemId);
+            ViewData["UnitOfMeasureId"] = new SelectList(_context.UnitOfMeasures, "UnitOfMeasureId", "Name", foodItemView.FoodItemId);
+
+            return View(foodItemView);
+        }
+
+        public async Task<IActionResult> ListFoodItemOptions()
+        {
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+
+            return View(await _context.FoodItemOptions.OrderByDescending(x => x.FoodItemOptionId).ToListAsync());
+        }
+
+        public IActionResult AddFoodOption()
+        {
+            return View(new FoodItemOptionViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddFoodItemOption([Bind("FoodItemId,Option")] FoodItemOptionViewModel foodItemOptionView)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            FoodItemOption foodItemOption = new()
+            {
+                FoodItemId = foodItemOptionView.FoodItemId,
+                Option = foodItemOptionView.Option,
+                AddedBy = user.UserName,
+                DateAdded = DateTime.Now
+            };
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    await _context.AddAsync(foodItemOption);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(ListFoodItemOptions));
+                }
+                else
+                {
+                    ViewBag.Message = "Unable to save changes. " +
+                        "Try again, and if the problem persists, " +
+                        "see your system administrator.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, ex, $"An error has occurred when trying to write into {foodItemOption.GetType().Name} table");
+            }
+
+            return View(foodItemOptionView);
+        }
+
+        public async Task<IActionResult> EditFoodItemOption(string id, string returnUrl = null)
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var foodItemOption = await _context.FoodItemOptions.FirstOrDefaultAsync(x => x.FoodItemOptionId == num);
+            if (foodItemOption == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            FoodItemOptionViewModel foodItemOptionView = new()
+            {
+                FoodItemId = foodItemOption.FoodItemId,
+                Option = foodItemOption.Option,
+            };
+
+            ViewData["ReturnUrl"] = retUrl;
+
+            return View(foodItemOptionView);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditFoodItemOption(string id, [Bind("FoodItemOptionId,FoodItemId,Option")] FoodItemOptionViewModel foodItemOptionView, string returnUrl = null)
+        {
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            if (num != foodItemOptionView.FoodItemOptionId)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            FoodItemOption foodItemOption = new()
+            {
+                FoodItemOptionId = foodItemOptionView.FoodItemOptionId,
+                FoodItemId = foodItemOptionView.FoodItemId,
+                Option = foodItemOptionView.Option,
+                UpdatedBy = user.UserName,
+                DateUpdated = DateTime.Now
+            };
+
+            var oldValue = JsonConvert.SerializeObject(await _context.FoodItems.FirstOrDefaultAsync(x => x.FoodItemId == foodItemOption.FoodItemOptionId));
+            var newValue = JsonConvert.SerializeObject(foodItemOption);
+
+            if (await _approvalService.UpdateApprovalQueue(foodItemOption.GetType().Name, "FoodItemOption", UpdateAction.Update, oldValue, newValue, user.UserName))
+            {
+                return RedirectToAction(nameof(Confirmation), new { url = returnUrl });
+            }
+            else
+            {
+                ViewBag.Message = "Unable to save changes. " +
+                    "Try again, and if the problem persists, " +
+                    "see your system administrator.";
+            }
+
+            return View(foodItemOptionView);
+        }
+
+        public async Task<IActionResult> ListStocks()
+        {
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+
+            return View(await _context.Stocks.OrderByDescending(x => x.StockId).ToListAsync());
+        }
+
+        public IActionResult AddStock()
+        {
+            return View(new StockViewModel() { Date = DateTime.Today });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddStock([Bind("FoodItemId,Quantity,Date,TransactionType")] StockViewModel stockView)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            Stock stock = new()
+            {
+                FoodItemId = stockView.FoodItemId,
+                Quantity = stockView.Quantity,
+                AddedBy = user.UserName,
+                DateAdded = DateTime.Now
+            };
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    using (TransactionScope scope = new ())
+                    {
+                        if (await _stockLevelRepository.UpdateStocHistory(stock))
+                        {
+                            await _context.AddAsync(stock);
+                            await _context.SaveChangesAsync();
+
+                            scope.Complete();
+                        }
+                        else
+                        {
+                            ViewBag.Message = "Unable to save changes. " +
+                            "Try again, and if the problem persists, " +
+                            "see your system administrator.";
+
+                            return View(stockView);
+                        }
+                    }
+                        
+
+                    return RedirectToAction(nameof(ListStocks));
+                }
+                else
+                {
+                    ViewBag.Message = "Unable to save changes. " +
+                        "Try again, and if the problem persists, " +
+                        "see your system administrator.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, ex, $"An error has occurred when trying to write into {stock.GetType().Name} table");
+            }
+
+            return View(stockView);
+        }      
 
         private IActionResult RedirectToLocal(string returnUrl)
         {

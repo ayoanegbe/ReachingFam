@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace ReachingFam.Core.Models
 {
-    public class InwardItem
+    public class InwardItem : BaseEntity
     {
         [Key]
         public int InwardItemId { get; set; }
@@ -13,31 +14,30 @@ namespace ReachingFam.Core.Models
         public DateTime CollectionDate { get; set; }
         [Required]
         [Display(Name = "Total Weight (lbs)")]
-        public double TotalWeight { get; set; }
+        [Precision(18, 2)]
+        public decimal TotalWeight { get; set; }
         [Display(Name = "Non Perishables")]
         public bool NonPerishables { get; set; } = false;
         [Display(Name = "NP Weight")]
-        public double? NonPerishablesWeight { get; set; }
+        [Precision(18, 2)]
+        public decimal? NonPerishablesWeight { get; set; }
         public bool Perishables { get; set; } = false;
         [Display(Name = "P Weight")]
-        public double? PerishablesWeight { get; set; }
+        [Precision(18, 2)]
+        public decimal? PerishablesWeight { get; set; }
         public bool Frozen { get; set; } = false;
         [Display(Name = "F Weight")]
-        public double? FrozenWeight { get; set; }
+        [Precision(18, 2)]
+        public decimal? FrozenWeight { get; set; }
         [Display(Name = "Non Food")]
         public bool NonFood { get; set; } = false;
         [Display(Name = "NF Weight")]
-        public double? NonFoodWeight { get; set; }
+        [Precision(18, 2)]
+        public decimal? NonFoodWeight { get; set; }
         [Display(Name = "Total Waste (lbs)")]
-        public double? TotalWaste { get; set; }
-        [Display(Name = "Date Added")]
-        public DateTime DateAdded { get; set; } = DateTime.Now;
-        [Display(Name = "Date Updated")]
-        public DateTime? DateUpdated { get; set; }
-        [Display(Name = "Added By")]
-        public string AddedBy { get; set; }
-        [Display(Name = "Updated By")]
-        public string UpdatedBy { get; set; }
+        [Precision(18, 2)]
+        public decimal? TotalWaste { get; set; }
+        
         public string FilePath { get; set; }
         public string ThumbnailPath { get; set; }
     }

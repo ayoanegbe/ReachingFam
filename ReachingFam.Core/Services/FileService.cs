@@ -300,6 +300,24 @@ namespace ReachingFam.Core.Services
             return thumbPath;
         }
 
+        public async Task<(string filePath, string thumbFilePath, string message)> ProcessFile(IFormFile file, string mainDirectory, string subDirectory)
+        {
+            string filePath = string.Empty;
+            string message = string.Empty;
+            string thumbnailPath = string.Empty;
+
+            string[] allowedExtensions = ["jpeg", "jpg", "png"];
+
+            if (file != null)
+            {
+                (filePath, message) = await SaveFile(file, mainDirectory, subDirectory, allowedExtensions);
+
+                thumbnailPath = FileResize(file.FileName, filePath, 100, 75);
+            }
+
+            return (filePath, thumbnailPath, message);
+        }
+
         public string GetContentType(string path)
         {
             var types = GetMimeTypes();

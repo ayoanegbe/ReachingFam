@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ReachingFam.Core.Models
 {
-    public class Donor
+    public class Donor : BaseEntity
     {
         [Key]
         public int DonorId { get; set; }
@@ -20,14 +20,5 @@ namespace ReachingFam.Core.Models
         public string ContactEmail { get; set; }
         [Display(Name = "Contact Phone")]
         public string ContactPhone { get; set; }
-        [Display(Name = "Date Added")]
-        public DateTime DateAdded { get; set; } = DateTime.Now;
-        [Display(Name = "Date Updated")]
-        public DateTime? DateUpdated { get; set; }
-        [Display(Name = "Added By")]
-        public string AddedBy { get; set; }
-        [Display(Name = "Updated By")]
-        public string UpdatedBy { get; set; }
-
     }
 }

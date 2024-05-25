@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ReachingFam.Core.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -18,9 +19,16 @@ namespace ReachingFam.Core.Models
         [Display(Name = "Other Names")]
         public string OtherNames { get; set; }
         public string Address { get; set; }
+        [Required]
         public string Email { get; set; }
+        [Required]
         public string Phone { get; set; }
-        
+        [Required]
+        public MessageOptions MessageOptions { get; set; } = MessageOptions.TextMessage;
+        [Required]
+        public GenderType Gender { get; set; }
+        [Required]
+        public DisabilityClass Disability { get; set; }        
         public string Code { get; set; }
         [Display(Name = "Date Added")]
         public DateTime DateAdded { get; set; } = DateTime.Now;

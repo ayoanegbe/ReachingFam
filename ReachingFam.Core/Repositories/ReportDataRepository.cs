@@ -14,16 +14,10 @@ using System.Threading.Tasks;
 
 namespace ReachingFam.Core.Repositories
 {
-    public class ReportDataRepository : IReportData
+    public class ReportDataRepository(ILogger<ReportDataRepository> logger, ApplicationDbContext context) : IReportData
     {
-        private readonly ILogger<ReportDataRepository> _logger;
-        private readonly ApplicationDbContext _context;
-
-        public ReportDataRepository(ILogger<ReportDataRepository> logger, ApplicationDbContext context)
-        {
-            _logger = logger;
-            _context = context;
-        }
+        private readonly ILogger<ReportDataRepository> _logger = logger;
+        private readonly ApplicationDbContext _context = context;
 
         public async Task<FullHamperReportViewModel> FullHamperReport()
         {
@@ -134,10 +128,10 @@ namespace ReachingFam.Core.Repositories
 
         public async Task<SummaryReportViewModel> SummaryReport(DateTime date)
         {
-            double donorWeight = await _context.InwardItems.Where(x => x.CollectionDate == date).SumAsync(x => x.TotalWeight);
+            decimal donorWeight = await _context.InwardItems.Where(x => x.CollectionDate == date).SumAsync(x => x.TotalWeight);
             int donorCount = await _context.InwardItems.Where(x => x.CollectionDate == date).CountAsync();
 
-            double familyWeight = await _context.Hampers.Where(x => x.CollectionDate == date && x.Collected).SumAsync(x => x.Weight);
+            decimal familyWeight = await _context.Hampers.Where(x => x.CollectionDate == date && x.Collected).SumAsync(x => x.Weight);
             int familyCount = await _context.Hampers.Where(x => x.CollectionDate == date && x.Collected).CountAsync();
 
             int familySize = await _context.Hampers.Where(x => x.CollectionDate == date && x.Collected).SumAsync(x => x.FamilySize);
@@ -145,14 +139,14 @@ namespace ReachingFam.Core.Repositories
             int adults = (int)await _context.Hampers.Where(x => x.CollectionDate == date && x.Collected).SumAsync(x => x.Adults);
             int children = (int)await _context.Hampers.Where(x => x.CollectionDate == date && x.Collected).SumAsync(x => x.Children);
 
-            double partnerWeight = await _context.PartnerGiveOuts.Where(x => x.CollectionDate == date && x.Collected).SumAsync(x => x.Weight);
+            decimal partnerWeight = await _context.PartnerGiveOuts.Where(x => x.CollectionDate == date && x.Collected).SumAsync(x => x.Weight);
             int partnerCount = await _context.PartnerGiveOuts.Where(x => x.CollectionDate == date && x.Collected).CountAsync();
 
-            double volunteerWeight = await _context.VolunteerGiveOuts.Where(x => x.CollectionDate == date).SumAsync(x => x.Weight);
+            decimal volunteerWeight = await _context.VolunteerGiveOuts.Where(x => x.CollectionDate == date).SumAsync(x => x.Weight);
             int volunteerCount = await _context.VolunteerGiveOuts.Where(x => x.CollectionDate == date).CountAsync();
-            double hours = await _context.SignIns.Where(x => x.Date == date).SumAsync(x => x.HoursWorked);
+            decimal hours = await _context.SignIns.Where(x => x.Date == date).SumAsync(x => x.HoursWorked);
 
-            double waste = await _context.Wastes.Where(x => x.Date == date).SumAsync(x => x.Weight);
+            decimal waste = await _context.Wastes.Where(x => x.Date == date).SumAsync(x => x.Weight);
 
             if (donorWeight == 0 && familyWeight == 0 && partnerWeight == 0 && volunteerWeight == 0)
                 return null;

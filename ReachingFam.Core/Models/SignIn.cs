@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace ReachingFam.Core.Models
         [Display(Name = "Clock Out")]
         public DateTime? ClockOut { get; set; }
         [Display(Name = "Hours Worked")]
-        public double HoursWorked { get; set; }
+        [Precision(18, 2)]
+        public decimal HoursWorked { get; set; }
     }
 }

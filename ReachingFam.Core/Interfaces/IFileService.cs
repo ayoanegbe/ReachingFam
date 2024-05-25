@@ -19,5 +19,6 @@ namespace ReachingFam.Core.Interfaces
         string CheckInvalidChars(string fileNme);
         string FileResize(string fileName, string filePath, int width, int height);
         string GetContentType(string path);
+        Task<(string filePath, string thumbFilePath, string message)> ProcessFile(IFormFile file, string mainDirectory, string subDirectory);
     }
 }

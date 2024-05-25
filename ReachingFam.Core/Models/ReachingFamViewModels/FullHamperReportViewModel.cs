@@ -8,9 +8,9 @@ namespace ReachingFam.Core.Models.ReachingFamViewModels
 {
     public class FullHamperReportViewModel
     {
-        public double WeightIn { get; set; }
-        public double WeightOut { get; set; }
-        public double TotalHamperWeight { get; set; }
+        public decimal WeightIn { get; set; }
+        public decimal WeightOut { get; set; }
+        public decimal TotalHamperWeight { get; set; }
         public List<DailyCollection> DailyCollections { get; set; }
     }
 }

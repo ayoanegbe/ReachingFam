@@ -17,7 +17,7 @@ namespace ReachingFam.Core.Models
         [Display(Name = "Time")]
         [DataType(DataType.Time)]
         public DateTime CollectionTime { get; set; }
-        public double Weight { get; set; }
+        public decimal Weight { get; set; }
         [Display(Name = "Collected?")]
         public bool Collected { get; set; } = false;
         public string Source { get; set; }
