@@ -50,5 +50,6 @@ namespace ReachingFam.Core.Models.ReachingFamViewModels
         [Display(Name = "Date Collected")]
         public DateTime? DateCollected { get; set; }
         public IFormFile File { get; set; }
+        public List<HamperItem> HamperItems { get; set; }
     }
 }

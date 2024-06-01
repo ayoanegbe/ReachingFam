@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ReachingFam.Core.Models
 {
-    public class HamperItem
+    public class HamperItem : BaseEntity
     {
         [Key]
         public int HamperItemId { get; set; }

@@ -135,8 +135,63 @@
                             </div>
                         </div>
 
+                        <div id="hamperItems">
+                            <hr />
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <div class="row align-items-center">
+                                                <div class="col">
+                                                    <h4 class="card-title">Hamper Items</h4>
+                                                </div><!--end col-->
+                                            </div>  <!--end row-->
+                                        </div><!--end card-header-->
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table mb-0" id="hamperTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Food Item</th>
+                                                            <th>Price</th>
+                                                            <th>Quantity</th>
+                                                            <th>Total</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>
+                                                                <img src="assets/images/products/01.png" alt="" height="40" class="me-2">
+                                                                <p class="d-inline-block align-middle mb-0">
+                                                                    <a href="#" class="d-inline-block align-middle mb-0 product-name">Reebok Shoes</a>
+                                                                    <br>
+                                                                    <span class="text-muted font-13">size-08 (Model 2019)</span>
+                                                                </p>
+                                                            </td>
+                                                            <td>$99</td>
+                                                            <td>
+                                                                <input class="form-control w-25" type="number" value="2" id="example-number-input1">
+                                                            </td>
+                                                            <td>$198</td>
+                                                            <td>
+                                                                <a href="#" class="text-dark"><i class="mdi mdi-close-circle-outline font-18"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+
+
                         <div class="form-group">
-                            <button type="submit" class="btn btn-de-primary btn-sm text-light px-4 mt-3 mb-0">Save</button>
+                            <button type="submit" class="btn btn-de-primary btn-sm text-light px-4 mt-3 mb-0">Add Items</button>
                             <a class="btn btn-de-danger btn-sm text-light px-4 mt-3 mb-0" asp-action="FamilyHamperList">Cancel</a>
                         </div>
                     </form>

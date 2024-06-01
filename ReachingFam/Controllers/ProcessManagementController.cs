@@ -29,7 +29,10 @@ namespace ReachingFam.Controllers
         IApprovalService approvalService,
         IFileService fileService,
         IResolverService resolverService,
-        IStockLevelRepository stockLevelRepository
+        IStockLevelRepository stockLevelRepository,
+        IUnitOfWork unitOfWork,
+        IGenericRepository<Hamper> familyHamperRepository,
+        IGenericRepository<HamperItem> familyHamperItemRepository
             ) : Controller
     {
         private readonly ApplicationDbContext _context = context;
@@ -42,6 +45,9 @@ namespace ReachingFam.Controllers
         private readonly IFileService _fileService = fileService;
         private readonly IResolverService _resolverService = resolverService;
         private readonly IStockLevelRepository _stockLevelRepository = stockLevelRepository;
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IGenericRepository<Hamper> _familyHamperRepository = familyHamperRepository;
+        private readonly IGenericRepository<HamperItem> _familyHamperItemRepository = familyHamperItemRepository;
 
         public async Task<IActionResult> InwardItemsList()
         {
@@ -315,7 +321,7 @@ namespace ReachingFam.Controllers
                     await _context.AddAsync(hamper);
                     await _context.SaveChangesAsync();
 
-                    return RedirectToAction(nameof(FamilyHamperList));
+                    return RedirectToAction(nameof(AddFamilyHamperItem), new { id = _protector.Encode(hamper.HamperId.ToString()) });
                 }
                 else
                 {
@@ -330,6 +336,115 @@ namespace ReachingFam.Controllers
             }
 
             ViewData["FamilyId"] = new SelectList(_context.Families, "FamilyId", "FullName");
+
+            return View(hamperView);
+        }
+
+        public async Task<IActionResult> AddFamilyHamperItem(string id)
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var hamper = await _context.Hampers.Include(x => x.Family).FirstOrDefaultAsync(x => x.HamperId == num);
+            if (hamper == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            HamperViewModel hamperView = new()
+            {
+                HamperId = hamper.HamperId,
+                FamilyId = hamper.FamilyId,
+                CollectionDate = hamper.CollectionDate,
+                CollectionTime = hamper.CollectionTime,
+                Weight = hamper.Weight,
+                NonPerishables = hamper.NonPerishables,
+                NonPerishablesWeight = hamper.NonPerishablesWeight,
+                Perishables = hamper.Perishables,
+                PerishablesWeight = hamper.PerishablesWeight,
+                Frozen = hamper.Frozen,
+                FrozenWeight = hamper.FrozenWeight,
+                NonFood = hamper.NonFood,
+                NonFoodWeight = hamper.NonFoodWeight,
+                FamilySize = hamper.FamilySize,
+                Seniors = hamper.Seniors,
+                Adults = hamper.Adults,
+                Children = hamper.Children,
+                Collected = hamper.Collected,
+                HamperItems = []
+            };
+
+            ViewData["FamilyId"] = new SelectList(_context.Families, "FamilyId", "FullName", hamperView.HamperId);
+
+            return View(hamperView);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddFamilyHamperItem(string id, [Bind("HamperId,HamperItems")] HamperViewModel hamperView)
+        {
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            if (num != hamperView.HamperId)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            //using (var scope = new TransactionScope(TransactionScopeOption.Required,
+            //    new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted }))
+            //{
+
+            //}
+
+            try
+            {
+                foreach (var item in hamperView.HamperItems)
+                {
+                    HamperItem hamperItem = new()
+                    {
+                        HamperId = hamperView.HamperId,
+                        FoodItemId = item.FoodItemId,
+                        Quantity = item.Quantity,
+                        Note = item.Note,
+                        UpdatedBy = user.UserName,
+                        DateUpdated = DateTime.Now
+                    };
+
+                    await _familyHamperItemRepository.AddAsync(hamperItem);
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+
+                return RedirectToAction(nameof(FamilyHamperList));
+
+            }
+            catch (Exception ex)
+            {
+
+                ViewBag.Message = "Unable to save changes. " +
+                    "Try again, and if the problem persists, " +
+                    "see your system administrator.";
+
+                _logger.Log(LogLevel.Error, ex, $"Unable to add family hamper items: {JsonConvert.SerializeObject(hamperView)}");
+
+            }
+
+            ViewData["FamilyId"] = new SelectList(_context.Families, "FamilyId", "FullName", hamperView.HamperId);
 
             return View(hamperView);
         }

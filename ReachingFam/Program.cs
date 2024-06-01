@@ -49,6 +49,8 @@ namespace ReachingFam
             builder.Services.AddTransient<IApprovalService, ApprovalService>();
             builder.Services.AddTransient<IResolverService, ResolverService>();
             builder.Services.AddTransient<IStockLevelRepository, StockLevelRepository>();
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             builder.Services.AddSingleton<RecaptchaService>();
 
