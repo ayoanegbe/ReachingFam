@@ -42,6 +42,7 @@ namespace ReachingFam.Controllers
         public async Task<IActionResult> ListDonors()
         {
             ViewData["ReturnUrl"] = HttpContext.Request.Path;
+            //string timeZoneId = HttpContext.Request.Cookies["userTimeZoneId"];
 
             return View(await _context.Donors.OrderByDescending(x => x.DonorId).ToListAsync());
         }
@@ -574,6 +575,7 @@ namespace ReachingFam.Controllers
 
             UnitOfMeasureViewModel unitOfMeasureView = new()
             {
+                UnitOfMeasureId = num,
                 Name = unitOfMeasure.Name,
                 Symbol = unitOfMeasure.Symbol,
                 Description = unitOfMeasure.Description,    

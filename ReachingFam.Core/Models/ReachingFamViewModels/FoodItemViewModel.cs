@@ -19,5 +19,6 @@ namespace ReachingFam.Core.Models.ReachingFamViewModels
         public decimal ReorderLevel { get; set; }
         public int UnitOfMeasureId { get; set; }
         public UnitOfMeasure UnitOfMeasure { get; set; }
+        public string Barcode { get; set; }
     }
 }

@@ -9,7 +9,6 @@ namespace ReachingFam.Core.Enums
     public enum TransactionType
     {
         Add = 1,
-        Remove = 2,
-        Adjustment = 3,
+        Issue = 2
     }
 }

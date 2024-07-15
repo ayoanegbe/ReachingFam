@@ -11,11 +11,12 @@ using System.Threading.Tasks;
 
 namespace ReachingFam.Core.Services
 {
-    public static  class Utils
+    public static class Utils
     {
         private const string keyString = "c55d79f3f4184e2f8f3c979b367821b1";
         private const string ClientKey = "-@!8A0P.!nm099(+";
         private const string ClientSalt = "i+!_Ay(1_9-*!71O";
+        private static readonly Random random = new();
 
         public static string RemoveSpecialCharacters(string str)
         {
@@ -254,6 +255,14 @@ namespace ReachingFam.Core.Services
             {
                 yield return new DateTime(year, month, day);
             }
+        }
+
+        public static string GenerateUniqueNumber()
+        {
+            var timestampPart = DateTime.UtcNow.ToString("HHmmss"); // 6 digits from the current time
+            var randomPart = random.Next(0, 100).ToString("D2");    // 2 digits random number
+
+            return timestampPart + randomPart;
         }
 
     }

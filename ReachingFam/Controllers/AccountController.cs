@@ -15,9 +15,8 @@ using Microsoft.EntityFrameworkCore;
 using ReachingFam.Core.Interfaces;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using ReachingFam.Controllers;
 
-namespace CareConnect.Controllers
+namespace ReachingFam.Controllers
 {
     [Authorize]
     public class AccountController(

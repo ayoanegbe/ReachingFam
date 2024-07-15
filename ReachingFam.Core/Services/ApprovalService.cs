@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using ReachingFam.Core.Data;
 using ReachingFam.Core.Enums;
 using ReachingFam.Core.Interfaces;
@@ -62,6 +63,59 @@ namespace ReachingFam.Core.Services
             }
 
             return false;
+        }
+
+        public async Task<bool> UpdateTable(string obj, string objName)
+        {
+            try
+            {
+                switch (objName)
+                {
+                    case "Donor":
+                        Donor donor = JsonConvert.DeserializeObject<Donor>(obj);
+                        _context.Update(donor);
+                        break;
+                    case "Family":
+                        Family family = JsonConvert.DeserializeObject<Family>(obj);
+                        _context.Update(family);
+                        break;
+                    case "Hamper":
+                        Hamper hamper = JsonConvert.DeserializeObject<Hamper>(obj);
+                        _context.Update(hamper);
+                        break;
+                    case "InwardItem":
+                        InwardItem inward = JsonConvert.DeserializeObject<InwardItem>(obj);
+                        _context.Update(inward);
+                        break;
+                    case "Partner":
+                        Partner partner = JsonConvert.DeserializeObject<Partner>(obj);
+                        _context.Update(partner);
+                        break;
+                    case "PartnerGiveOut":
+                        PartnerGiveOut partnerGive = JsonConvert.DeserializeObject<PartnerGiveOut>(obj);
+                        _context.Update(partnerGive);
+                        break;
+                    case "VolunteerGiveOut":
+                        VolunteerGiveOut volunteer = JsonConvert.DeserializeObject<VolunteerGiveOut>(obj);
+                        _context.Update(volunteer);
+                        break;
+                    case "Waste":
+                        Waste waste = JsonConvert.DeserializeObject<Waste>(obj);
+                        _context.Update(waste);
+                        break;
+                    case "UnitOfMeasure":
+                        UnitOfMeasure unitOfMeasure = JsonConvert.DeserializeObject<UnitOfMeasure>(obj);
+                        _context.Update(unitOfMeasure);
+                        break;
+                    default:
+                        break;
+                }
+
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch { return false; }
         }
     }
 }

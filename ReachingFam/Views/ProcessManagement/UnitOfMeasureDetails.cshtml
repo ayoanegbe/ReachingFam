@@ -1,10 +1,8 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿
 @{
-    ViewData["Title"] = "Family Details";
-    var oldValue = (Family)ViewData["oldValue"];
-    var newValue = (Family)ViewData["newValue"];
+    ViewData["Title"] = "Donor Details";
+    var oldValue = (UnitOfMeasure)ViewData["oldValue"];
+    var newValue = (UnitOfMeasure)ViewData["newValue"];
 }
 
 <div class="container-fluid">
@@ -18,10 +16,10 @@
                         <li class="breadcrumb-item">
                             <a asp-action="ItemsForApproval">Items For Approval</a>
                         </li><!--end nav-item-->
-                        <li class="breadcrumb-item active">Family Details</li>
+                        <li class="breadcrumb-item active">UoM Details</li>
                     </ol>
                 </div>
-                <h4 class="page-title">Family Details</h4>
+                <h4 class="page-title">UoM Details</h4>
             </div><!--end page-title-box-->
         </div><!--end col-->
     </div>
@@ -36,40 +34,22 @@
                             <hr />
                             <dl class="row">
                                 <dt class="col-sm-4">
-                                    Last Name
+                                    Name
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @oldValue.LastName
+                                    @oldValue.Name
                                 </dd>
                                 <dt class="col-sm-4">
-                                    Other Names
+                                    Symbol
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @oldValue.OtherNames
+                                    @oldValue.Symbol
                                 </dd>
                                 <dt class="col-sm-4">
-                                    Address
+                                    Description
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @oldValue.Address
-                                </dd>
-                                <dt class="col-sm-4">
-                                    Email
-                                </dt>
-                                <dd class="col-sm-8">
-                                    @oldValue.Email
-                                </dd>
-                                <dt class="col-sm-4">
-                                    Phone
-                                </dt>
-                                <dd class="col-sm-8">
-                                    @oldValue.Email
-                                </dd>
-                                <dt class="col-sm-4">
-                                    Code
-                                </dt>
-                                <dd class="col-sm-8">
-                                    @oldValue.Code
+                                    @oldValue.Description
                                 </dd>
                                 <dt class="col-sm-4">
                                     Added By
@@ -102,40 +82,22 @@
                             <hr />
                             <dl class="row">
                                 <dt class="col-sm-4">
-                                    Last Name
+                                    Name
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @newValue.LastName
+                                    @newValue.Name
                                 </dd>
                                 <dt class="col-sm-4">
-                                    Other Names
+                                    Symbol
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @newValue.OtherNames
+                                    @newValue.Symbol
                                 </dd>
                                 <dt class="col-sm-4">
-                                    Address
+                                    Description
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @newValue.Address
-                                </dd>
-                                <dt class="col-sm-4">
-                                    Email
-                                </dt>
-                                <dd class="col-sm-8">
-                                    @newValue.Email
-                                </dd>
-                                <dt class="col-sm-4">
-                                    Phone
-                                </dt>
-                                <dd class="col-sm-8">
-                                    @newValue.Email
-                                </dd>
-                                <dt class="col-sm-4">
-                                    Code
-                                </dt>
-                                <dd class="col-sm-8">
-                                    @newValue.Code
+                                    @newValue.Description
                                 </dd>
                                 <dt class="col-sm-4">
                                     Updated By

@@ -13,5 +13,6 @@ namespace ReachingFam.Core.Interfaces
         //Task<List<ApprovalQueue>> GetItemsForApproval(string className, DateTime startDate, DateTime endDate);
         Task<(T, T)> GetItemForApproval<T>(int id) where T : class;
         Task<bool> UpdateApprovalQueue(string className, string moduleName, UpdateAction action, string oldValue, string newValue, string userName);
+        Task<bool> UpdateTable(string obj, string objName);
     }
 }

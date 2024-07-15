@@ -1,0 +1,75 @@
+﻿@model UnitOfMeasureViewModel
+
+@{
+    ViewData["Title"] = "Add New UoM";
+}
+
+<div class="container-fluid">
+    <!-- Page-Title -->
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-title-box">
+                <div class="float-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Analytics</a></li>
+                        <li class="breadcrumb-item">
+                            <a asp-action="ListUOMs">UoMs</a>
+                        </li><!--end nav-item-->
+                        <li class="breadcrumb-item active">New UoM</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Add New UoM</h4>
+            </div><!--end page-title-box-->
+        </div><!--end col-->
+    </div>
+    <!-- end page title end breadcrumb -->
+    <div class="row">
+        <div class="col-12 col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="AddUOM" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        @if (ViewBag.Message != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible" role="alert">
+                                <strong>Oh snap!</strong> @ViewBag.Message
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+                            </div>
+                        }
+                        <div class="form-group row">
+                            <div class="col-md-6 mb-3">
+                                <label class="col-form-label" asp-for="Name"></label>
+                                <input asp-for="Name" type="text" placeholder="Name" class="form-control">
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="col-form-label" asp-for="Symbol"></label>
+                                <input asp-for="Symbol" type="text" placeholder="Symbol" class="form-control">
+                                <span asp-validation-for="Symbol" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-12 mb-3">
+                                <label class="col-form-label" asp-for="Description"></label>
+                                <input asp-for="Description" type="text" placeholder="Address" class="form-control">
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-de-primary btn-sm text-light px-4 mt-3 mb-0">Save</button>
+                            <a class="btn btn-de-danger btn-sm text-light px-4 mt-3 mb-0" asp-action="ListUOMs">Cancel</a>
+                        </div>
+                    </form>
+                </div> <!--end card-body-->
+            </div><!--end card-->
+        </div> <!--end col-->
+    </div><!--end row-->
+
+</div><!-- container -->
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

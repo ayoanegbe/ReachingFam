@@ -21,6 +21,7 @@ namespace ReachingFam.Core.Data
         public DbSet<HamperItem> HamperItems { get; set; }
         public DbSet<InwardItem> InwardItems { get; set; }
         public DbSet<ItemCategory> ItemCategories { get; set; }
+        public DbSet<Location> Locations { get; set; }
         public DbSet<Partner> Partners { get; set; }
         public DbSet<PartnerGiveOut> PartnerGiveOuts { get; set; }
         public DbSet<PartnerHamperItem> PartnerHamperItems { get; set; }
@@ -29,6 +30,7 @@ namespace ReachingFam.Core.Data
         public DbSet<SmtpSetting> SmtpSettings { get; set; }
         public DbSet<Stock> Stocks { get; set; }
         public DbSet<StockHistory> StockHistories { get; set; }
+        public DbSet<StockTransaction> StockTransactions { get; set; }
         public DbSet<UnitOfMeasure> UnitOfMeasures { get; set; }
         public DbSet<VolunteerGiveOut> VolunteerGiveOuts { get; set; }
         public DbSet<VolunteerHamperItem> VolunteerHamperItems { get; set; }

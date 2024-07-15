@@ -1,10 +1,7 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-    ViewData["Title"] = "Inward Item Details";
-    var oldValue = (InwardItem)ViewData["oldValue"];
-    var newValue = (InwardItem)ViewData["newValue"];
+﻿@{
+    ViewData["Title"] = "Donor Details";
+    var oldValue = (FoodItem)ViewData["oldValue"];
+    var newValue = (FoodItem)ViewData["newValue"];
 }
 
 <div class="container-fluid">
@@ -18,10 +15,10 @@
                         <li class="breadcrumb-item">
                             <a asp-action="ItemsForApproval">Items For Approval</a>
                         </li><!--end nav-item-->
-                        <li class="breadcrumb-item active">Inward Item Details</li>
+                        <li class="breadcrumb-item active">Food Item Details</li>
                     </ol>
                 </div>
-                <h4 class="page-title">Inward Item Details</h4>
+                <h4 class="page-title">Food Item Details</h4>
             </div><!--end page-title-box-->
         </div><!--end col-->
     </div>
@@ -39,67 +36,43 @@
                                     Name
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @oldValue.Donor.Name
+                                    @oldValue.Name
                                 </dd>
                                 <dt class="col-sm-4">
-                                    Collection Date
+                                    Item Type
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @oldValue.CollectionDate
-                                </dd>                                
-                                <dt class="col-sm-4">
-                                    Weight
-                                </dt>
-                                <dd class="col-sm-8">
-                                    @oldValue.TotalWeight
+                                    @oldValue.ItemType.ToString()
                                 </dd>
                                 <dt class="col-sm-4">
-                                    Non Perishables?
+                                    Category
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @(oldValue.NonPerishables ? "Yes" : "No")
+                                    @oldValue.Category.Name
                                 </dd>
                                 <dt class="col-sm-4">
-                                    Non Perishables Weight
+                                    In Stock
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @oldValue.NonPerishablesWeight
+                                    @oldValue.InStock
                                 </dd>
                                 <dt class="col-sm-4">
-                                    Perishables?
+                                    Has Option
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @(oldValue.Perishables ? "Yes" : "No")
+                                    @oldValue.HasOption
                                 </dd>
                                 <dt class="col-sm-4">
-                                    Perishables Weight
+                                    Reorder Level
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @oldValue.PerishablesWeight
+                                    @oldValue.ReorderLevel
                                 </dd>
                                 <dt class="col-sm-4">
-                                    Non Food?
+                                    Unit Of Measure
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @(oldValue.NonFood ? "Yes" : "No")
-                                </dd>
-                                <dt class="col-sm-4">
-                                    Non Food Weight
-                                </dt>
-                                <dd class="col-sm-8">
-                                    @oldValue.NonFoodWeight
-                                </dd>
-                                <dt class="col-sm-4">
-                                    Frozen?
-                                </dt>
-                                <dd class="col-sm-8">
-                                    @(oldValue.Frozen ? "Yes" : "No")
-                                </dd>
-                                <dt class="col-sm-4">
-                                    Frozen Weight
-                                </dt>
-                                <dd class="col-sm-8">
-                                    @oldValue.FrozenWeight
+                                    @oldValue.UnitOfMeasure.Name
                                 </dd>
                                 <dt class="col-sm-4">
                                     Added By
@@ -135,68 +108,44 @@
                                     Name
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @newValue.Donor.Name
+                                    @oldValue.Name
                                 </dd>
                                 <dt class="col-sm-4">
-                                    Collection Date
+                                    Item Type
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @newValue.CollectionDate
+                                    @oldValue.ItemType.ToString()
                                 </dd>
                                 <dt class="col-sm-4">
-                                    Weight
+                                    Category
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @newValue.TotalWeight
+                                    @oldValue.Category.Name
                                 </dd>
                                 <dt class="col-sm-4">
-                                    Non Perishables?
+                                    In Stock
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @(newValue.NonPerishables ? "Yes" : "No")
+                                    @oldValue.InStock
                                 </dd>
                                 <dt class="col-sm-4">
-                                    Non Perishables Weight
+                                    Has Option
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @newValue.NonPerishablesWeight
+                                    @oldValue.HasOption
                                 </dd>
                                 <dt class="col-sm-4">
-                                    Perishables?
+                                    Reorder Level
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @(newValue.Perishables ? "Yes" : "No")
+                                    @oldValue.ReorderLevel
                                 </dd>
                                 <dt class="col-sm-4">
-                                    Perishables Weight
+                                    Unit Of Measure
                                 </dt>
                                 <dd class="col-sm-8">
-                                    @newValue.PerishablesWeight
-                                </dd>
-                                <dt class="col-sm-4">
-                                    Non Food?
-                                </dt>
-                                <dd class="col-sm-8">
-                                    @(newValue.NonFood ? "Yes" : "No")
-                                </dd>
-                                <dt class="col-sm-4">
-                                    Non Food Weight
-                                </dt>
-                                <dd class="col-sm-8">
-                                    @newValue.NonFoodWeight
-                                </dd>
-                                <dt class="col-sm-4">
-                                    Frozen?
-                                </dt>
-                                <dd class="col-sm-8">
-                                    @(newValue.Frozen ? "Yes" : "No")
-                                </dd>
-                                <dt class="col-sm-4">
-                                    Frozen Weight
-                                </dt>
-                                <dd class="col-sm-8">
-                                    @newValue.FrozenWeight
-                                </dd>
+                                    @oldValue.UnitOfMeasure.Name
+                                </dd>                               
                                 <dt class="col-sm-4">
                                     Updated By
                                 </dt>

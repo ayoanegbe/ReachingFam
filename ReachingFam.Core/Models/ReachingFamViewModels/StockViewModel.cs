@@ -1,14 +1,21 @@
-﻿using ReachingFam.Core.Enums;
+﻿using Microsoft.EntityFrameworkCore;
+using ReachingFam.Core.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace ReachingFam.Core.Models.ReachingFamViewModels
 {
     public class StockViewModel
     {
         public int StockId { get; set; }
+        public int DonorId { get; set; }
+        public Donor Donor { get; set; }
         public int FoodItemId { get; set; }
         public FoodItem FoodItem { get; set; }
+        [Precision(18, 2)]
         public decimal Quantity { get; set; }
-        public DateTime Date { get; set; }
-        public TransactionType TransactionType { get; set; } = TransactionType.Add;
+        [Display(Name = "Date Received")]
+        public DateTime DateReceived { get; set; }
+
+        public ICollection<StockTransaction> StockTransactions { get; set; }
     }
 }

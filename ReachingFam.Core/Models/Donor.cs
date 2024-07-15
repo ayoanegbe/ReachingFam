@@ -20,5 +20,7 @@ namespace ReachingFam.Core.Models
         public string ContactEmail { get; set; }
         [Display(Name = "Contact Phone")]
         public string ContactPhone { get; set; }
+
+        public ICollection<Stock> Stocks { get; set; }
     }
 }

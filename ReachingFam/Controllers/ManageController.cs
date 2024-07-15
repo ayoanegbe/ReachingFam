@@ -12,7 +12,7 @@ using ReachingFam.Core.Models;
 using ReachingFam.Core.Models.ManageViewModels;
 using ReachingFam.Core.Interfaces;
 
-namespace CareConnect.Controllers
+namespace ReachingFam.Controllers
 {
     public class ManageController : Controller
     {

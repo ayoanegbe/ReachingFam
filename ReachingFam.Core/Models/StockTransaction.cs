@@ -9,19 +9,15 @@ using System.Threading.Tasks;
 
 namespace ReachingFam.Core.Models
 {
-    public class Stock : BaseEntity
+    public class StockTransaction
     {
         [Key]
+        public int StockTransactionId { get; set; }
         public int StockId { get; set; }
-        public int DonorId { get; set; }
-        public Donor Donor { get; set; }
-        public int FoodItemId { get; set; }
-        public FoodItem FoodItem { get; set; }
+        public Stock Stock { get; set; }
         [Precision(18, 2)]
         public decimal Quantity { get; set; }
-        [Display(Name = "Date Received")]
-        public DateTime DateReceived { get; set; }
-
-        public ICollection<StockTransaction> StockTransactions { get; set; }
+        public TransactionType TransactionType { get; set; }
+        public DateTime TransactionDate { get; set; }
     }
 }

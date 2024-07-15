@@ -39,21 +39,24 @@ namespace ReachingFam
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
 
-            builder.Services.AddSingleton<UniqueCode>();
-            builder.Services.AddSingleton<CustomIDataProtection>();
+            
             builder.Services.Configure<RecaptchaSettings>(builder.Configuration.GetSection("GoogleRecaptchaV3"));
             builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+            builder.Services.AddSingleton<UniqueCode>();
+            builder.Services.AddSingleton<CustomIDataProtection>();
+            builder.Services.AddSingleton<RecaptchaService>();
 
             builder.Services.AddTransient<IReportData, ReportDataRepository>();
             builder.Services.AddTransient<IFileService, FileService>();
             builder.Services.AddTransient<IApprovalService, ApprovalService>();
             builder.Services.AddTransient<IResolverService, ResolverService>();
-            builder.Services.AddTransient<IStockLevelRepository, StockLevelRepository>();
+            builder.Services.AddTransient<IBarcodeService, BarcodeService>();
+            builder.Services.AddTransient<IStockService, StockService>();
+
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-            builder.Services.AddSingleton<RecaptchaService>();
-
+            
             builder.Services.AddHttpClient();
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
