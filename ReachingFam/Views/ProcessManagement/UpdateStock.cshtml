@@ -1,0 +1,88 @@
+﻿@model StockViewModel
+
+@inject CustomIDataProtection protector;
+
+@{
+    ViewData["Title"] = "Update Stock";
+}
+
+<div class="container-fluid">
+    <!-- Page-Title -->
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-title-box">
+                <div class="float-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Analytics</a></li>
+                        <li class="breadcrumb-item">
+                            <a asp-action="ListStocks">Stocks</a>
+                        </li><!--end nav-item-->
+                        <li class="breadcrumb-item active">Update Stock</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Update Stock</h4>
+            </div><!--end page-title-box-->
+        </div><!--end col-->
+    </div>
+    <!-- end page title end breadcrumb -->
+    <div class="row">
+        <div class="col-12 col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="EditFoodItem" asp-route-returnUrl="@protector.Encode(ViewBag.ReturnUrl)" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="StockId" />
+                        @if (ViewBag.Message != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible" role="alert">
+                                <strong>Oh snap!</strong> @ViewBag.Message
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+                            </div>
+                        }
+                        @if (ViewBag.Approval != null)
+                        {
+                            <div class="alert alert-success alert-dismissible" role="alert">
+                                <strong>Yay!</strong> @ViewBag.Approval
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+                            </div>
+                        }
+                        <div class="form-group row">
+                            <div class="col-md-6 mb-3">
+                                <label class="col-form-label" asp-for="DonorId"></label>
+                                <select asp-for="DonorId" asp-items="ViewBag.DonorId" class="form-select" id="default">
+                                    <option selected="selected" value="">Please Select Donor</option>
+                                </select>
+                                <span asp-validation-for="DonorId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="col-form-label" asp-for="FoodItemId"></label>
+                                <select asp-for="FoodItemId" asp-items="ViewBag.FoodItemId" class="form-select" id="default">
+                                    <option selected="selected" value="">Please Select Food Item</option>
+                                </select>
+                                <span asp-validation-for="FoodItemId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <div class="col-md-4">
+                            <input asp-for="Quantity" type="text" asp-format="{0:n2}" placeholder="Quantity" class="form-control" onkeypress="return isDecimalKey(event)">
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-de-primary btn-sm text-light px-4 mt-3 mb-0">Save</button>
+                            <a class="btn btn-de-danger btn-sm text-light px-4 mt-3 mb-0" asp-action="ListFoodItems">Cancel</a>
+                        </div>
+                    </form>
+                </div> <!--end card-body-->
+            </div><!--end card-->
+        </div> <!--end col-->
+    </div><!--end row-->
+
+</div><!-- container -->
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

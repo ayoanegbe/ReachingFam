@@ -107,6 +107,18 @@ namespace ReachingFam.Core.Services
                         UnitOfMeasure unitOfMeasure = JsonConvert.DeserializeObject<UnitOfMeasure>(obj);
                         _context.Update(unitOfMeasure);
                         break;
+                    case "FoodItem":
+                        FoodItem foodItem = JsonConvert.DeserializeObject<FoodItem>(obj);
+                        _context.Update(foodItem);
+                        break;
+                    case "FoodItemOption":
+                        FoodItemOption foodItemOption = JsonConvert.DeserializeObject<FoodItemOption>(obj);
+                        _context.Update(foodItemOption);
+                        break;
+                    case "ItemCategory":
+                        ItemCategory itemCategory = JsonConvert.DeserializeObject<ItemCategory>(obj);
+                        _context.Update(itemCategory);
+                        break;
                     default:
                         break;
                 }

@@ -29,7 +29,6 @@ namespace ReachingFam.Core.Data
         public DbSet<SignIn> SignIns { get; set; }
         public DbSet<SmtpSetting> SmtpSettings { get; set; }
         public DbSet<Stock> Stocks { get; set; }
-        public DbSet<StockHistory> StockHistories { get; set; }
         public DbSet<StockTransaction> StockTransactions { get; set; }
         public DbSet<UnitOfMeasure> UnitOfMeasures { get; set; }
         public DbSet<VolunteerGiveOut> VolunteerGiveOuts { get; set; }

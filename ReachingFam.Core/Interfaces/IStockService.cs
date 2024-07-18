@@ -15,9 +15,8 @@ namespace ReachingFam.Core.Interfaces
         Task<bool> SetFoodItemStatus(int id);
         Task<List<StockTransaction>> FoodItemStockHistory(FoodItem foodItem, DateTime startDate, DateTime endDate);
         Task<decimal> FoodItemStockLevel(FoodItem foodItem, DateTime startDate, DateTime endDate);
-        Task<string> AddStock(int foodItemId, int quantity, int donorId);
-        Task<string> AddStock(Stock stock);
-        Task<string> IssueStock(int stockId, decimal quantity);
+        Task<string> AddToStock(Stock stock);
+        Task<string> AddNewStock(Stock stock);
         Task<string> IssueStock(Stock stock);
         Task<List<StockTransaction>> GetStockHistory(int foodItemId);
         Task<decimal> PriorBalance(FoodItem foodItem, DateTime startDate);

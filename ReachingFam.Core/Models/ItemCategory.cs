@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ReachingFam.Core.Models
 {
-    public class ItemCategory
+    public class ItemCategory : BaseEntity
     {
         [Key]
         public int ItemCategoryId { get; set; }

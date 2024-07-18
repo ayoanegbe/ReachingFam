@@ -129,25 +129,30 @@
                 <div class="title-box">
                     <h6 class="menu-title">Stock Management</h6>
                 </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="ProcessManagement" asp-action="ListItemCategories">Food Items Categories</a>
+                    </li>
+                </ul>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="ProcessManagement" asp-action="ListFoodItems">Food Items</a>
+                    </li>
+                </ul>
                 
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link">Food Items</a>
+                        <a class="nav-link" asp-controller="ProcessManagement" asp-action="ListFoodItemOptions">Food Items Options</a>
                     </li>
                 </ul>
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link">Food Items Categories</a>
+                        <a class="nav-link" asp-controller="ProcessManagement" asp-action="ListStocks">Stock Items</a>
                     </li>
                 </ul>
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link">Food Items Options</a>
-                    </li>
-                </ul>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link">Stock Items</a>
+                        <a class="nav-link" asp-controller="ProcessManagement" asp-action="AddStock">Add Stock</a>
                     </li>
                 </ul>
 

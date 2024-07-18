@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 
 namespace ReachingFam.Core.Models.ReachingFamViewModels
 {
-    public class FoodItemOptionViewModel
+    public class ItemCategoryViewModel
     {
-        public int FoodItemOptionId { get; set; }
-        public int FoodItemId { get; set; }
-        public FoodItem FoodItem { get; set; }
+        public int ItemCategoryId { get; set; }
         [Required]
-        public string Option { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
     }
 }

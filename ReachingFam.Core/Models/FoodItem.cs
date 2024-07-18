@@ -13,12 +13,18 @@ namespace ReachingFam.Core.Models
         [Key]
         public int FoodItemId { get; set; }
         public string Name { get; set; }
+        [Display(Name = "Item Type")]
         public FoodItemType ItemType { get; set; }
+        [Display(Name = "Category")]
         public int ItemCategoryId { get; set; }
         public ItemCategory Category { get; set; }
-        public bool InStock { get; set; } = true;
+        [Display(Name = "In Stock")]
+        public bool InStock { get; set; } = false;
+        [Display(Name = "Has Option")]
         public bool HasOption { get; set; } = false;
+        [Display(Name = "Reorder Level")]
         public decimal ReorderLevel { get; set; }
+        [Display(Name = "UoM")]
         public int UnitOfMeasureId { get; set; }
         public UnitOfMeasure UnitOfMeasure { get; set; }
         public string Barcode { get; set; }

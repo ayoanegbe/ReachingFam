@@ -70,34 +70,32 @@ namespace ReachingFam.Core.Services
         {
             return await _context.Stocks.Where(x => x.FoodItemId == foodItemId).SumAsync(x => x.Quantity);
         }
-
-        public async Task<string> AddStock(int foodItemId, int quantity, int donorId)
+        
+        public async Task<string> AddToStock(Stock stock)
         {
             var existingStock = _context.Stocks
-           .FirstOrDefault(s => s.FoodItemId == foodItemId && s.DonorId == donorId);
+           .FirstOrDefault(s => s.FoodItemId == stock.FoodItemId && s.DonorId == stock.DonorId);
 
             if (existingStock != null)
             {
                 return "Stock entry already exists for this food item and donor.";
             }
 
-            var stock = new Stock
-            {
-                FoodItemId = foodItemId,
-                Quantity = quantity,
-                DonorId = donorId,
-                DateReceived = DateTime.Now
-            };
+            existingStock.Quantity += stock.Quantity;
+            existingStock.UpdatedBy = stock.UpdatedBy;
+            existingStock.DateUpdated = DateTime.Now;
 
-            await _context.Stocks.AddAsync(stock);
+            _context.Update(existingStock);
             await _context.SaveChangesAsync();
 
             var stockTransaction = new StockTransaction
             {
-                StockId = stock.StockId,
+                StockId = existingStock.StockId,
                 TransactionType = TransactionType.Add,
-                Quantity = quantity,
-                TransactionDate = DateTime.Now
+                Quantity = stock.Quantity,
+                TransactionDate = DateTime.Now,
+                AddedBy = stock.UpdatedBy,
+                DateAdded = DateTime.Now
             };
 
             await _context.StockTransactions.AddAsync(stockTransaction);
@@ -106,7 +104,7 @@ namespace ReachingFam.Core.Services
             return "Successful";
         }
 
-        public async Task<string> AddStock(Stock stock)
+        public async Task<string> AddNewStock(Stock stock)
         {
             try
             {
@@ -125,7 +123,9 @@ namespace ReachingFam.Core.Services
                     StockId = stock.StockId,
                     TransactionType = TransactionType.Add,
                     Quantity = stock.Quantity,
-                    TransactionDate = DateTime.Now
+                    TransactionDate = DateTime.Now,
+                    AddedBy = stock.AddedBy,
+                    DateAdded = DateTime.Now
                 };
 
                 await _context.StockTransactions.AddAsync(stockTransaction);
@@ -140,40 +140,7 @@ namespace ReachingFam.Core.Services
 
             return "Failed";
         }
-
-        public async Task<string> IssueStock(int stockId, decimal quantity)
-        {
-            try
-            {
-                var stock = await _context.Stocks.FindAsync(stockId);
-                if (stock != null && stock.Quantity >= quantity)
-                {
-                    stock.Quantity -= quantity;
-                    _context.Update(stock);
-                    await _context.SaveChangesAsync();
-
-                    var stockTransaction = new StockTransaction
-                    {
-                        StockId = stock.StockId,
-                        TransactionType = TransactionType.Issue,
-                        Quantity = quantity * -1,
-                        TransactionDate = DateTime.Now
-                    };
-
-                    await _context.StockTransactions.AddAsync(stockTransaction);
-                    await _context.SaveChangesAsync();
-                }
-
-                return "Successful";
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"An error has occurred in {new StackTrace().GetFrame(0).GetMethod()}: {ex}");
-            }
-
-            return "Failed";
-        }
-
+       
         public async Task<string> IssueStock(Stock stock)
         {
             try
@@ -182,6 +149,9 @@ namespace ReachingFam.Core.Services
                 if (existingStock != null && existingStock.Quantity >= stock.Quantity)
                 {
                     existingStock.Quantity -= stock.Quantity;
+                    existingStock.UpdatedBy = stock.UpdatedBy;
+                    existingStock.DateUpdated = DateTime.Now;
+
                     _context.Update(existingStock);
                     await _context.SaveChangesAsync();
 
@@ -190,7 +160,9 @@ namespace ReachingFam.Core.Services
                         StockId = stock.StockId,
                         TransactionType = TransactionType.Issue,
                         Quantity = stock.Quantity * -1,
-                        TransactionDate = DateTime.Now
+                        TransactionDate = DateTime.Now,
+                        AddedBy = stock.UpdatedBy,
+                        DateAdded = DateTime.Now
                     };
 
                     await _context.StockTransactions.AddAsync(stockTransaction);

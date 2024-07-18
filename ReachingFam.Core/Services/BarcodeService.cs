@@ -1,11 +1,4 @@
-﻿using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Runtime.InteropServices;
-using ZXing;
-using ZXing.Common;
-using SkiaSharp;
-using IronBarCode;
+﻿using IronBarCode;
 using ReachingFam.Core.Interfaces;
 
 namespace ReachingFam.Core.Services

@@ -1,0 +1,113 @@
+﻿@model FoodItemViewModel
+
+@{
+    ViewData["Title"] = "Add New Food Item";
+}
+
+<div class="container-fluid">
+    <!-- Page-Title -->
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="page-title-box">
+                <div class="float-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Analytics</a></li>
+                        <li class="breadcrumb-item">
+                            <a asp-action="ListFoodItems">Food Items</a>
+                        </li><!--end nav-item-->
+                        <li class="breadcrumb-item active">New Food Item</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Add New Food Item</h4>
+            </div><!--end page-title-box-->
+        </div><!--end col-->
+    </div>
+    <!-- end page title end breadcrumb -->
+    <div class="row">
+        <div class="col-12 col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="AddFoodItem" enctype="multipart/form-data" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        @if (ViewBag.Message != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible" role="alert">
+                                <strong>Oh snap!</strong> @ViewBag.Message
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+                            </div>
+                        }
+                        <div class="form-group row">
+                            <div class="col-md-6 mb-3">
+                                <label class="col-form-label" asp-for="Name"></label>
+                                <input asp-for="Name" type="text" placeholder="Name" class="form-control">
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-6 mb-3">
+                                <label class="col-form-label" asp-for="ItemType"></label>
+                                <select asp-for="ItemType" asp-items="@Html.GetEnumSelectList<FoodItemType>()" class="form-select" id="default">
+                                    <option selected="selected" value="">Please Select Food Item Type</option>
+                                </select>
+                                <span asp-validation-for="ItemType" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="col-form-label" asp-for="ItemCategoryId"></label>
+                                <select asp-for="ItemCategoryId" asp-items="ViewBag.ItemCategoryId" class="form-select" id="default">
+                                    <option selected="selected" value="">Please Select Food Item Category</option>
+                                </select>
+                                <span asp-validation-for="ItemCategoryId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group row mb-3">                            
+                            <div class="col-md-6 mb-3">
+                                <label class="col-form-label" asp-for="ReorderLevel"></label>
+                                <input asp-for="ReorderLevel" type="text" placeholder="Reorder Level" class="form-control">
+                                <span asp-validation-for="ReorderLevel" class="text-danger"></span>
+                            </div>
+                            <div class="form-check col-md-2 mt-4">
+                                <input asp-for=InStock class="form-check-input" type="checkbox">
+                                <label asp-for=InStock class="form-check-label"></label>
+                            </div>
+                            <div class="form-check col-md-2 mt-4">
+                                <input asp-for=HasOption class="form-check-input" type="checkbox">
+                                <label asp-for=HasOption class="form-check-label"></label>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <div class="form-group row">
+                            <div class="col-md-4 mb-3">
+                                <label class="col-form-label">UoM</label>
+                                <select asp-for="UnitOfMeasureId" asp-items="ViewBag.UnitOfMeasureId" class="form-select" id="default">
+                                    <option selected="selected" value="">Please Select Unit of Measure</option>
+                                </select>
+                                <span asp-validation-for="UnitOfMeasureId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for=Barcode class="col-form-label"></label>
+                                <input asp-for=Barcode type="text" class="form-control" placeholder="Reorder Level">
+                                <span asp-validation-for="Barcode" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-de-primary btn-sm text-light px-4 mt-3 mb-0">Save</button>
+                            <a class="btn btn-de-danger btn-sm text-light px-4 mt-3 mb-0" asp-action="ListFoodItems">Cancel</a>
+                        </div>
+                    </form>
+                </div> <!--end card-body-->
+            </div><!--end card-->
+        </div> <!--end col-->
+    </div><!--end row-->
+
+</div><!-- container -->
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

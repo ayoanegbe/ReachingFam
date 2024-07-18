@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ReachingFam.Core.Models
 {
-    public class StockTransaction
+    public class StockTransaction : BaseEntity
     {
         [Key]
         public int StockTransactionId { get; set; }
