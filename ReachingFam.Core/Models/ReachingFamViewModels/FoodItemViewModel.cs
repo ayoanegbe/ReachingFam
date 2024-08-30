@@ -12,6 +12,12 @@ namespace ReachingFam.Core.Models.ReachingFamViewModels
         [Display(Name = "Category")]
         public int ItemCategoryId { get; set; }
         public ItemCategory Category { get; set; }
+        [Display(Name = "Option")]
+        public int FoodItemOptionId { get; set; }
+        public FoodItemOption FoodItemOption { get; set; }
+        [Display(Name = "Substitute")]
+        public int FoodItemSubstituteId { get; set; }
+        public FoodItemSubstitute Substitute { get; set; }
         [Display(Name = "In Stock")]
         public bool InStock { get; set; } = false;
         [Display(Name = "Has Option")]

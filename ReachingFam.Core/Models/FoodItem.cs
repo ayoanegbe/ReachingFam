@@ -1,4 +1,5 @@
-﻿using ReachingFam.Core.Enums;
+﻿using Microsoft.EntityFrameworkCore;
+using ReachingFam.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -23,12 +24,16 @@ namespace ReachingFam.Core.Models
         [Display(Name = "Has Option")]
         public bool HasOption { get; set; } = false;
         [Display(Name = "Reorder Level")]
-        public decimal ReorderLevel { get; set; }
+        [Precision(18, 2)]
+        public decimal? ReorderLevel { get; set; }
         [Display(Name = "UoM")]
         public int UnitOfMeasureId { get; set; }
         public UnitOfMeasure UnitOfMeasure { get; set; }
         public string Barcode { get; set; }
 
         public ICollection<Stock> Stocks { get; set; }
+        public ICollection<FoodItemOption> Options { get; set; }
+        public ICollection<FoodItemSubstitute> FoodItemSubstitutes { get; set; }
+        public ICollection<FoodItemSubstitute> SubstituteForFoodItems { get; set; }
     }
 }

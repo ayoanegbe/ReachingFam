@@ -21,7 +21,7 @@ namespace ReachingFam.Core.Services
         public async Task<decimal> FoodItemReorderLevel(int id)
         {
             FoodItem item = await _context.FoodItems.FindAsync(id);
-            return item.ReorderLevel;
+            return (decimal)item.ReorderLevel;
         }
 
         public async Task<bool> IsFoodItemInStock(int id)
@@ -73,8 +73,7 @@ namespace ReachingFam.Core.Services
         
         public async Task<string> AddToStock(Stock stock)
         {
-            var existingStock = _context.Stocks
-           .FirstOrDefault(s => s.FoodItemId == stock.FoodItemId && s.DonorId == stock.DonorId);
+            var existingStock = _context.Stocks.FirstOrDefault(s => s.FoodItemId == stock.FoodItemId && s.DonorId == stock.DonorId);
 
             if (existingStock != null)
             {
@@ -201,6 +200,30 @@ namespace ReachingFam.Core.Services
         public async Task<decimal> StockBalance(FoodItem foodItem, DateTime startDate, DateTime endDate)
         {
             return await _context.StockTransactions.Include(x => x.Stock).Where(x => x.Stock.FoodItemId == foodItem.FoodItemId && (x.TransactionDate >= startDate || x.TransactionDate <= endDate)).SumAsync(x => x.Quantity);
+        }
+
+        public async Task<string> AddFoodItemSubstitute(FoodItemSubstitute substitute)
+        {
+            try
+            {
+                var existingSubstitude = _context.FoodItemSubstitutes.FirstOrDefault(s => s.FoodItemId == substitute.FoodItemId && s.FoodItemSubstituteId == substitute.FoodItemSubstituteId);
+
+                if (existingSubstitude != null)
+                {
+                    return "Substitude entry already exists for this food item and donor.";
+                }
+
+                await _context.FoodItemSubstitutes.AddAsync(substitute);
+                await _context.SaveChangesAsync();                
+
+                return "Successful";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"An error has occurred in {new StackTrace().GetFrame(0).GetMethod()}: {ex}");
+            }
+
+            return "Failed";
         }
     }
 }

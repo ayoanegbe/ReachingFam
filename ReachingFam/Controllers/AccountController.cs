@@ -416,12 +416,14 @@ namespace ReachingFam.Controllers
 
             HttpContext.Session.Clear();
 
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
             await _signInManager.SignOutAsync();
             _logger.LogInformation(4, "User logged out.");
 
             ViewData["LoginView"] = loginView;
 
-            return View();
+            return RedirectToAction(nameof(Login), "Account");
         }
 
         //

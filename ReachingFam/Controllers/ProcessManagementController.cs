@@ -227,7 +227,7 @@ namespace ReachingFam.Controllers
 
             if (await _approvalService.UpdateApprovalQueue(inwardItem.GetType().Name, "Inward Item", UpdateAction.Update, oldValue, newValue, user.UserName))
             {
-                return RedirectToAction(nameof(Confirmation), new { url = retUrl });
+                return RedirectToAction(nameof(Confirmation), new { url = _protector.Encode(retUrl) });
             }
             else
             {
@@ -469,7 +469,7 @@ namespace ReachingFam.Controllers
 
             if (await _approvalService.UpdateApprovalQueue(hamper.GetType().Name, "Family Hamper", UpdateAction.Update, oldValue, newValue, user.UserName))
             {
-                return RedirectToAction(nameof(Confirmation), new { url = retUrl });
+                return RedirectToAction(nameof(Confirmation), new { url = _protector.Encode(retUrl) });
             }
             else
             {
@@ -665,7 +665,7 @@ namespace ReachingFam.Controllers
 
             if (await _approvalService.UpdateApprovalQueue(partnerGiveOut.GetType().Name, "Partner Hamper", UpdateAction.Update, oldValue, newValue, user.UserName))
             {
-                return RedirectToAction(nameof(Confirmation), new { url = retUrl });
+                return RedirectToAction(nameof(Confirmation), new { url = _protector.Encode(retUrl) });
             }
             else
             {
@@ -841,7 +841,7 @@ namespace ReachingFam.Controllers
 
             if (await _approvalService.UpdateApprovalQueue(volunteerGiveOut.GetType().Name, "Volunteer Hamper", UpdateAction.Update, oldValue, newValue, user.UserName))
             {
-                return RedirectToAction(nameof(Confirmation), new { url = retUrl });
+                return RedirectToAction(nameof(Confirmation), new { url = _protector.Encode(retUrl) });
             }
             else
             {
@@ -1011,7 +1011,7 @@ namespace ReachingFam.Controllers
 
             if (await _approvalService.UpdateApprovalQueue(waste.GetType().Name, "Waste Item", UpdateAction.Update, oldValue, newValue, user.UserName))
             {
-                return RedirectToAction(nameof(Confirmation), new { url = retUrl });
+                return RedirectToAction(nameof(Confirmation), new { url = _protector.Encode(retUrl) });
             }
             else
             {
@@ -1128,10 +1128,17 @@ namespace ReachingFam.Controllers
             return RedirectToAction(nameof(ItemsForCollection));
         }
 
-        public IActionResult Confirmation(string url)
+        public IActionResult Confirmation(string returnUrl)
         {
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            ViewData["ReturnUrl"] = retUrl;
+
             ViewData["Approval"] = "Your changes have been forwarded for approval";
-            ViewData["ReturnUrl"] = url;
 
             return View();
         }
@@ -1308,6 +1315,10 @@ namespace ReachingFam.Controllers
                     return RedirectToAction(nameof(FoodItemOptionDetails), new { obj = encrptedObj });
                 case "ItemCategory":
                     return RedirectToAction(nameof(ItemCategoryDetails), new { obj = encrptedObj });
+                case "OptionType":
+                    return RedirectToAction(nameof(OptionTypeDetails), new { obj = encrptedObj });
+                case "OptionValue":
+                    return RedirectToAction(nameof(OptionValueDetails), new { obj = encrptedObj });
                 default:
                     ViewBag.Message = "Unable to get changes. " +
                     "Try again, and if the problem persists, " +
@@ -1630,11 +1641,59 @@ namespace ReachingFam.Controllers
             return View();
         }
 
+        public IActionResult OptionTypeDetails(string obj)
+        {
+            if (obj == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            ApprovalObject approvalObject = _resolverService.ResolveObject<ApprovalObject>(obj);
+            if (approvalObject == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            OptionType oldValue = JsonConvert.DeserializeObject<OptionType>(approvalObject.OldValue);
+            OptionType newValue = JsonConvert.DeserializeObject<OptionType>(approvalObject.NewValue);
+
+            ViewData["oldValue"] = oldValue;
+            ViewData["newValue"] = newValue;
+            ViewData["ReturnUrl"] = approvalObject.ReturnUrl;
+
+            return View();
+        }
+
+        public IActionResult OptionValueDetails(string obj)
+        {
+            if (obj == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            ApprovalObject approvalObject = _resolverService.ResolveObject<ApprovalObject>(obj);
+            if (approvalObject == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            OptionValue oldValue = JsonConvert.DeserializeObject<OptionValue>(approvalObject.OldValue);
+            OptionValue newValue = JsonConvert.DeserializeObject<OptionValue>(approvalObject.NewValue);
+
+            ViewData["oldValue"] = oldValue;
+            ViewData["newValue"] = newValue;
+            ViewData["ReturnUrl"] = approvalObject.ReturnUrl;
+
+            return View();
+        }
+
         public async Task<IActionResult> ListFoodItems()
         {
             ViewData["ReturnUrl"] = HttpContext.Request.Path;
 
-            return View(await _context.FoodItems.Include(x => x.Category).Include(x => x.UnitOfMeasure).OrderByDescending(x => x.FoodItemId).ToListAsync());
+            return View(await _context.FoodItems.Include(x => x.Category).Include(x => x.UnitOfMeasure).Include(x => x.FoodItemSubstitutes).ThenInclude(x => x.SubstituteFoodItem).OrderByDescending(x => x.FoodItemId).ToListAsync());
         }
 
         public IActionResult AddFoodItem()
@@ -1724,7 +1783,7 @@ namespace ReachingFam.Controllers
                 ItemCategoryId = foodItem.ItemCategoryId,
                 InStock = foodItem.InStock,
                 HasOption = foodItem.HasOption,
-                ReorderLevel = foodItem.ReorderLevel,
+                ReorderLevel = (decimal)foodItem.ReorderLevel,
                 UnitOfMeasureId = foodItem.UnitOfMeasureId,
                 Barcode = foodItem.Barcode,
             };
@@ -1769,9 +1828,15 @@ namespace ReachingFam.Controllers
             var oldValue = JsonConvert.SerializeObject(await _context.FoodItems.FirstOrDefaultAsync(x => x.FoodItemId == foodItem.FoodItemId));
             var newValue = JsonConvert.SerializeObject(foodItem);
 
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
             if (await _approvalService.UpdateApprovalQueue(foodItem.GetType().Name, "FoodItem", UpdateAction.Update, oldValue, newValue, user.UserName))
             {
-                return RedirectToAction(nameof(Confirmation), new { url = returnUrl });
+                return RedirectToAction(nameof(Confirmation), new { url = _protector.Encode(retUrl) });
             }
             else
             {
@@ -1790,24 +1855,88 @@ namespace ReachingFam.Controllers
         {
             ViewData["ReturnUrl"] = HttpContext.Request.Path;
 
-            return View(await _context.FoodItemOptions.Include(x => x.FoodItemId).OrderByDescending(x => x.FoodItemOptionId).ToListAsync());
+            return View(await _context.FoodItemOptions.Include(x => x.FoodItem).OrderByDescending(x => x.FoodItemOptionId).ToListAsync());
         }
 
-        public IActionResult AddFoodOption()
+        public async Task<IActionResult> ListFoodItemOptions(string id, string returnUrl = null)
         {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            ViewData["ReturnUrl"] = retUrl;
+
+            return View(await _context.FoodItemOptions.Where(x => x.FoodItemId == num).Include(x => x.FoodItem).OrderByDescending(x => x.FoodItemOptionId).ToListAsync());
+        }
+
+        public IActionResult AddFoodItemOption(string returnUrl = null)
+        {
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            ViewData["ReturnUrl"] = retUrl;
+
+            ViewData["FoodItemId"] = new SelectList(_context.FoodItems, "FoodItemId", "Name");
+
             return View(new FoodItemOptionViewModel());
+        }
+
+        public IActionResult AddFoodItemOption(string id, string returnUrl = null)
+        {
+
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            FoodItem foodItem = _context.FoodItems.FirstOrDefault(x => x.FoodItemId == num);
+
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            ViewData["ReturnUrl"] = retUrl;
+
+            return View(new FoodItemOptionViewModel() { FoodItemId = num, FoodItem = foodItem });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddFoodItemOption([Bind("FoodItemId,Option")] FoodItemOptionViewModel foodItemOptionView)
+        public async Task<IActionResult> AddFoodItemOption([Bind("FoodItemId,OptionTypeId,OptionValueId")] FoodItemOptionViewModel foodItemOptionView)
         {
             var user = await _userManager.GetUserAsync(User);
 
             FoodItemOption foodItemOption = new()
             {
                 FoodItemId = foodItemOptionView.FoodItemId,
-                Option = foodItemOptionView.Option,
+                OptionTypeId = foodItemOptionView.OptionTypeId,
+                OptionValueId = foodItemOptionView.OptionValueId,
                 AddedBy = user.UserName,
                 DateAdded = DateTime.Now
             };
@@ -1832,6 +1961,8 @@ namespace ReachingFam.Controllers
             {
                 _logger.Log(LogLevel.Error, ex, $"An error has occurred when trying to write into {foodItemOption.GetType().Name} table");
             }
+
+            ViewData["FoodItemId"] = new SelectList(_context.FoodItems, "FoodItemId", "Name");
 
             return View(foodItemOptionView);
         }
@@ -1865,17 +1996,20 @@ namespace ReachingFam.Controllers
             FoodItemOptionViewModel foodItemOptionView = new()
             {
                 FoodItemId = foodItemOption.FoodItemId,
-                Option = foodItemOption.Option,
+                OptionTypeId = foodItemOption.OptionTypeId,
+                OptionValueId = foodItemOption.OptionValueId,
             };
 
             ViewData["ReturnUrl"] = retUrl;
+
+            ViewData["FoodItemId"] = new SelectList(_context.FoodItems, "FoodItemId", "Name", foodItemOption.FoodItemOptionId);
 
             return View(foodItemOptionView);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditFoodItemOption(string id, [Bind("FoodItemOptionId,FoodItemId,Option")] FoodItemOptionViewModel foodItemOptionView, string returnUrl = null)
+        public async Task<IActionResult> EditFoodItemOption(string id, [Bind("FoodItemOptionId,FoodItemId,OptionTypeId,OptionValueId")] FoodItemOptionViewModel foodItemOptionView, string returnUrl = null)
         {
             int num = _resolverService.ResolveInterger(id);
             if (num == 0)
@@ -1894,7 +2028,8 @@ namespace ReachingFam.Controllers
             {
                 FoodItemOptionId = foodItemOptionView.FoodItemOptionId,
                 FoodItemId = foodItemOptionView.FoodItemId,
-                Option = foodItemOptionView.Option,
+                OptionTypeId = foodItemOptionView.OptionTypeId,
+                OptionValueId = foodItemOptionView.OptionValueId,
                 UpdatedBy = user.UserName,
                 DateUpdated = DateTime.Now
             };
@@ -1913,7 +2048,215 @@ namespace ReachingFam.Controllers
                     "see your system administrator.";
             }
 
+            ViewData["FoodItemId"] = new SelectList(_context.FoodItems, "FoodItemId", "Name", foodItemOption.FoodItemOptionId);
+
             return View(foodItemOptionView);
+        }
+
+        public async Task<IActionResult> ListFoodItemSubstitutes(string id, string returnUrl = null)
+        {
+            //ViewData["ReturnUrl"] = HttpContext.Request.Path;
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            ViewData["ReturnUrl"] = retUrl;
+
+            return View(await _context.FoodItemSubstitutes.Where(x => x.FoodItemId == num).Include(x => x.FoodItem).OrderByDescending(x => x.FoodItemSubstituteId).ToListAsync());
+        }
+
+        public IActionResult AddFoodItemSubstitute(string id)
+        {
+            //ViewData["ReturnUrl"] = HttpContext.Request.Path;
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            FoodItem foodItem = _context.FoodItems.FirstOrDefault(x => x.FoodItemId == num);
+
+            ViewData["FoodItemSubstituteId"] = new SelectList(_context.FoodItems.Where(x => x.FoodItemId != foodItem.FoodItemId), "FoodItemSubstituteId", "Name");
+
+            return View(new FoodItemSubstituteViewModel() { FoodItemId = num, FoodItem = foodItem });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddFoodItemSubstitute([Bind("FoodItemId,FoodItemSubstituteId,SubstituteFoodItemId")] FoodItemSubstituteViewModel foodItemSubstituteView)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            FoodItemSubstitute foodItemSubstitute = new()
+            {
+                FoodItemId = foodItemSubstituteView.FoodItemId,
+                FoodItemSubstituteId = foodItemSubstituteView.FoodItemSubstituteId,
+                SubstituteFoodItemId = foodItemSubstituteView.SubstituteFoodItemId,
+                AddedBy = user.UserName,
+                DateAdded = DateTime.Now
+            };
+
+            var result = await _stockService.AddFoodItemSubstitute(foodItemSubstitute);
+            if (result == "Successful")
+            {
+                return RedirectToAction(nameof(ListFoodItemSubstitutes));
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, result);
+                ViewBag.Message = "Unable to save changes. " +
+                            "Try again, and if the problem persists, " +
+                            "see your system administrator.";
+
+                ModelState.AddModelError(string.Empty, result);
+            }            
+
+            ViewData["FoodItemSubstituteId"] = new SelectList(_context.FoodItems.Where(x => x.FoodItemId != foodItemSubstituteView.FoodItemId), "FoodItemSubstituteId", "Name");
+
+            return View(foodItemSubstituteView);
+        }
+
+        public async Task<IActionResult> ManageSubstitutes(string id, string returnUrl = null)
+        {
+
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int foodItemId = _resolverService.ResolveInterger(id);
+            if (foodItemId == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var foodItem = await _context.FoodItems.Include(x => x.FoodItemSubstitutes)
+                                                        .ThenInclude(x => x.SubstituteFoodItem)
+                                                            .FirstOrDefaultAsync(x => x.FoodItemId == foodItemId);
+
+            var availableFoodItems = await _context.FoodItems.Where(x => x.FoodItemId != foodItemId)
+                                                        .Select(x => new SelectListItem
+                                                        {
+                                                            Value = x.FoodItemId.ToString(),
+                                                            Text = x.Name
+                                                        }).ToListAsync();
+
+            SubstituteViewModel substituteView = new()
+            {
+                FoodItemId = foodItem.FoodItemId,
+                Name = foodItem.Name,
+                Substitutes = foodItem.FoodItemSubstitutes.Select(x => new SubstituteItem
+                {
+                    SubstituteId = x.SubstituteFoodItemId,
+                    SubstituteName = x.SubstituteFoodItem.Name
+                }).ToList(),
+                AvailableFoodItems = availableFoodItems
+            };
+
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            ViewData["ReturnUrl"] = retUrl;
+
+            return View(substituteView);
+        }
+
+        public IActionResult AddSubstitute(string id)
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int foodItemId = _resolverService.ResolveInterger(id);
+            if (foodItemId == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            return View( new SubstituteViewModel() { FoodItemId = foodItemId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddSubstitute([Bind("FoodItemId,Name,Substitutes,AvailableFoodItems")] SubstituteViewModel substituteView)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (ModelState.IsValid)
+            {
+                var substitute = new FoodItemSubstitute
+                {
+                    FoodItemId = substituteView.FoodItemId,
+                    SubstituteFoodItemId = int.Parse(Request.Form["AvailableFoodItemId"]),
+                    DateAdded = DateTime.UtcNow,
+                    AddedBy = user.Email
+                };
+
+                _context.FoodItemSubstitutes.Add(substitute);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(ManageSubstitutes), new { id = _protector.Encode(substituteView.FoodItemId.ToString()) });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveSubstitute(string id, string substituteId)
+        {
+            if (id == null || substituteId == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int foodItemId = _resolverService.ResolveInterger(id);
+            if (foodItemId == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            int substituteFoodItemId = _resolverService.ResolveInterger(substituteId);
+            if (substituteFoodItemId == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var substitute = await _context.FoodItemSubstitutes
+                .FirstOrDefaultAsync(ps => ps.FoodItemId == foodItemId && ps.SubstituteFoodItemId == substituteFoodItemId);
+
+            if (substitute != null)
+            {
+                _context.FoodItemSubstitutes.Remove(substitute);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(ManageSubstitutes), new { id = _protector.Encode(foodItemId.ToString()) });
         }
 
         public async Task<IActionResult> ListItemCategories()
@@ -2267,5 +2610,10 @@ namespace ReachingFam.Controllers
             // Generate a unique barcode (e.g., using a GUID or any other unique logic)
             return Guid.NewGuid().ToString();
         }
+
+        //private bool FoodItemExists(int id)
+        //{
+        //    return _context.FoodItemSubstitutes.Any
+        //}
     }
 }

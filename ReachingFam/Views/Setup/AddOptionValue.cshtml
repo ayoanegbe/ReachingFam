@@ -1,9 +1,7 @@
-﻿@model FoodItemOptionViewModel
-
-@inject CustomIDataProtection protector;
+﻿@model OptionValueViewModel
 
 @{
-    ViewData["Title"] = "Edit Item Option";
+    ViewData["Title"] = "Add New Option Value";
 }
 
 <div class="container-fluid">
@@ -15,12 +13,12 @@
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Analytics</a></li>
                         <li class="breadcrumb-item">
-                            <a asp-action="ListFoodItemOptions">Food Item Options</a>
+                            <a asp-action="ListOptionValues">Option Value</a>
                         </li><!--end nav-item-->
-                        <li class="breadcrumb-item active">Update Food Item Option</li>
+                        <li class="breadcrumb-item active">New Option Value</li>
                     </ol>
                 </div>
-                <h4 class="page-title">Update Food Item Option</h4>
+                <h4 class="page-title">Add New Option Value</h4>
             </div><!--end page-title-box-->
         </div><!--end col-->
     </div>
@@ -29,9 +27,8 @@
         <div class="col-12 col-lg-8 mx-auto">
             <div class="card">
                 <div class="card-body">
-                    <form asp-action="EditFoodItemOption" asp-route-returnUrl="@protector.Encode(ViewBag.ReturnUrl)" method="post">
+                    <form asp-action="AddDonor" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                        <input type="hidden" asp-for="FoodItemOptionId" />
                         @if (ViewBag.Message != null)
                         {
                             <div class="alert alert-danger alert-dismissible" role="alert">
@@ -39,40 +36,26 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
                             </div>
                         }
-                        @if (ViewBag.Approval != null)
-                        {
-                            <div class="alert alert-success alert-dismissible" role="alert">
-                                <strong>Yay!</strong> @ViewBag.Approval
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
-                            </div>
-                        }
                         <div class="form-group row">
                             <div class="col-md-6 mb-3">
-                                <label class="col-form-label" asp-for="FoodItemId"></label>
-                                <select asp-for="FoodItemId" asp-items="ViewBag.FoodItemId" class="form-select" id="default">
-                                    <option selected="selected" value="">Please Select Food Item</option>
-                                </select>
-                                <span asp-validation-for="FoodItemId" class="text-danger"></span>
+                                <label class="col-form-label" asp-for="Name"></label>
+                                <input asp-for="Name" type="text" placeholder="Name" class="form-control">
+                                <span asp-validation-for="Name" class="text-danger"></span>
                             </div>
-                            <div class="col-md-4 mb-3">
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-6 mb-3">
                                 <label class="col-form-label" asp-for="OptionTypeId"></label>
                                 <select asp-for="OptionTypeId" asp-items="ViewBag.OptionTypeId" class="form-select" id="default">
                                     <option selected="selected" value="">Please Select Option Type</option>
                                 </select>
                                 <span asp-validation-for="OptionTypeId" class="text-danger"></span>
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="col-form-label" asp-for="OptionValueId"></label>
-                                <select asp-for="OptionValueId" asp-items="ViewBag.OptionValueId" class="form-select" id="default">
-                                    <option selected="selected" value="">Please Select Option Value</option>
-                                </select>
-                                <span asp-validation-for="OptionValueId" class="text-danger"></span>
-                            </div>
                         </div>
 
                         <div class="form-group">
                             <button type="submit" class="btn btn-de-primary btn-sm text-light px-4 mt-3 mb-0">Save</button>
-                            <a class="btn btn-de-danger btn-sm text-light px-4 mt-3 mb-0" asp-action="ListFoodItemOptions">Cancel</a>
+                            <a class="btn btn-de-danger btn-sm text-light px-4 mt-3 mb-0" asp-action="ListOptionValues">Cancel</a>
                         </div>
                     </form>
                 </div> <!--end card-body-->

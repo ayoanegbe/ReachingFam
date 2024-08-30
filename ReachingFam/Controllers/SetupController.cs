@@ -630,5 +630,269 @@ namespace ReachingFam.Controllers
 
             return View(unitOfMeasureView);
         }
+
+        public async Task<IActionResult> ListOptionTypes()
+        {
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+            //string timeZoneId = HttpContext.Request.Cookies["userTimeZoneId"];
+
+            return View(await _context.OptionTypes.OrderByDescending(x => x.OptionTypeId).ToListAsync());
+        }
+
+        public IActionResult AddOptionType() {  return View(new OptionTypeViewModel()); }
+
+        public async Task<IActionResult> AddOptionType([Bind("Name")] OptionTypeViewModel optionTypeView)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            OptionType optionType = new()
+            {
+                Name = optionTypeView.Name,
+                AddedBy = user.UserName,
+                DateAdded = DateTime.Now
+            };
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    await _context.AddAsync(optionType);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(ListOptionTypes));
+                }
+                else
+                {
+                    ViewBag.Message = "Unable to save changes. " +
+                        "Try again, and if the problem persists, " +
+                        "see your system administrator.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error,
+                            $"An error has occurred when trying to write into {optionType.GetType().Name} table",
+                            ex);
+            }
+
+            return View(optionTypeView);
+        }
+
+        public async Task<IActionResult> EditOptionType(string id, string returnUrl = null)
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var optionType = await _context.OptionTypes.FirstOrDefaultAsync(x => x.OptionTypeId == num);
+            if (optionType == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            OptionTypeViewModel optionTypeView = new()
+            {
+                Name = optionType.Name,
+            };
+
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            ViewData["ReturnUrl"] = retUrl;
+
+            return View(optionTypeView);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditOptionType(string id, [Bind("OptionTypeId,Name")] OptionTypeViewModel optionTypeView, string returnUrl = null)
+        {
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            if (num != optionTypeView.OptionTypeId)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            OptionType optionType = new()
+            {
+                OptionTypeId = optionTypeView.OptionTypeId,
+                Name = optionTypeView.Name,
+                UpdatedBy = user.UserName,
+                DateUpdated = DateTime.Now
+            };
+
+            var oldValue = JsonConvert.SerializeObject(await _context.OptionTypes.FirstOrDefaultAsync(x => x.OptionTypeId == optionType.OptionTypeId));
+            var newValue = JsonConvert.SerializeObject(optionType);
+
+            if (await _approvalService.UpdateApprovalQueue(optionType.GetType().Name, "OptionType", UpdateAction.Update, oldValue, newValue, user.UserName))
+            {
+                return RedirectToAction(nameof(Confirmation), new { url = returnUrl });
+            }
+            else
+            {
+                ViewBag.Message = "Unable to save changes. " +
+                    "Try again, and if the problem persists, " +
+                    "see your system administrator.";
+            }
+
+            return View(optionTypeView);
+        }
+
+        public async Task<IActionResult> ListOptionValues()
+        {
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+
+            return View(await _context.OptionValues.Include(x => x.OptionType).OrderByDescending(x => x.OptionValueId).ToListAsync());
+        }
+
+        public IActionResult AddOptionValue() 
+        {
+            ViewData["OptionTypeId"] = new SelectList(_context.OptionTypes, "OptionTypeId", "Name");
+            return View(new OptionTypeViewModel()); 
+        }
+
+        public async Task<IActionResult> AddOptionValue([Bind("OptionTypeId,Name")] OptionValueViewModel optionValueView)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            OptionValue optionValue = new()
+            {
+                OptionTypeId = optionValueView.OptionTypeId,
+                Name = optionValueView.Name,
+                AddedBy = user.UserName,
+                DateAdded = DateTime.Now
+            };
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    await _context.AddAsync(optionValue);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(ListOptionValues));
+                }
+                else
+                {
+                    ViewBag.Message = "Unable to save changes. " +
+                        "Try again, and if the problem persists, " +
+                        "see your system administrator.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error,
+                            $"An error has occurred when trying to write into {optionValue.GetType().Name} table",
+                            ex);
+            }
+
+            ViewData["OptionTypeId"] = new SelectList(_context.OptionTypes, "OptionTypeId", "Name", optionValueView.OptionValueId);
+
+            return View(optionValueView);
+        }
+
+        public async Task<IActionResult> EditOptionValue(string id, string returnUrl = null)
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var optionValue = await _context.OptionValues.FirstOrDefaultAsync(x => x.OptionValueId == num);
+            if (optionValue == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            OptionValueViewModel optionValueView = new()
+            {
+                OptionValueId = optionValue.OptionValueId,
+                OptionTypeId = optionValue.OptionTypeId,
+                Name = optionValue.Name,
+            };
+
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            ViewData["ReturnUrl"] = retUrl;
+
+            ViewData["OptionTypeId"] = new SelectList(_context.OptionTypes, "OptionTypeId", "Name", optionValueView.OptionValueId);
+
+            return View(optionValueView);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditOptionValue(string id, [Bind("OptionValueID,OptionTypeID,Name")] OptionValueViewModel optionValueView, string returnUrl = null)
+        {
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            if (num != optionValueView.OptionValueId)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            OptionValue optionValue = new()
+            {
+                OptionValueId = optionValueView.OptionTypeId,
+                OptionTypeId = optionValueView.OptionTypeId,
+                Name = optionValueView.Name,
+                UpdatedBy = user.UserName,
+                DateUpdated = DateTime.Now
+            };
+
+            var oldValue = JsonConvert.SerializeObject(await _context.OptionValues.FirstOrDefaultAsync(x => x.OptionValueId == optionValue.OptionValueId));
+            var newValue = JsonConvert.SerializeObject(optionValue);
+
+            if (await _approvalService.UpdateApprovalQueue(optionValue.GetType().Name, "OptionValue", UpdateAction.Update, oldValue, newValue, user.UserName))
+            {
+                return RedirectToAction(nameof(Confirmation), new { url = returnUrl });
+            }
+            else
+            {
+                ViewBag.Message = "Unable to save changes. " +
+                    "Try again, and if the problem persists, " +
+                    "see your system administrator.";
+            }
+
+            ViewData["OptionTypeId"] = new SelectList(_context.OptionTypes, "OptionTypeId", "Name", optionValueView.OptionValueId);
+
+            return View(optionValueView);
+        }
     }
+
 }

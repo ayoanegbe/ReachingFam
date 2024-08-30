@@ -22,5 +22,6 @@ namespace ReachingFam.Core.Interfaces
         Task<decimal> PriorBalance(FoodItem foodItem, DateTime startDate);
         Task<decimal> StockBalance(FoodItem foodItem);
         Task<decimal> StockBalance(FoodItem foodItem, DateTime startDate, DateTime endDate);
+        Task<string> AddFoodItemSubstitute(FoodItemSubstitute substitute);
     }
 }

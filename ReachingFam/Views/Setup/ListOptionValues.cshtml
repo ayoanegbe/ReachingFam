@@ -1,8 +1,8 @@
-﻿@model IEnumerable<FoodItemOption>
+﻿@model IEnumerable<OptionValue>
 
 @inject CustomIDataProtection protector;
 @{
-    ViewData["Title"] = "Food Item Option List";
+    ViewData["Title"] = "Option Value List";
     int i = 1;
 }
 
@@ -13,10 +13,10 @@
                 <div class="float-end">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a asp-action="Index" asp-controller="Home">Analytics</a></li>
-                        <li class="breadcrumb-item active">Food Item Options</li>
+                        <li class="breadcrumb-item active">Option Values</li>
                     </ol>
                 </div>
-                <h4 class="page-title">Food Item Options</h4>
+                <h4 class="page-title">Option Values</h4>
             </div>
             <!--end page-title-box-->
         </div>
@@ -27,7 +27,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="col">
-                        <a class="btn btn-soft-primary btn-sm px-4" asp-action="AddFoodItemOption"><i class="mdi mdi-plus me-2"></i>Add New</a>
+                        <a class="btn btn-soft-primary btn-sm px-4" asp-action="AddOptionValue"><i class="mdi mdi-plus me-2"></i>Add New</a>
                     </div>
                 </div><!--end card-header-->
                 <div class="card-body">
@@ -36,9 +36,8 @@
                             <thead class="thead-light">
                                 <tr>
                                     <th>#</th>
-                                    <th>@Html.DisplayNameFor(model => model.FoodItem.Name)</th>
+                                    <th>@Html.DisplayNameFor(model => model.Name)</th>
                                     <th>@Html.DisplayNameFor(model => model.OptionType.Name)</th>
-                                    <th>@Html.DisplayNameFor(model => model.OptionValue.Name)</th>
                                     <th>@Html.DisplayNameFor(model => model.DateAdded)</th>
                                     <th>Actions</th>
                                 </tr>
@@ -48,12 +47,11 @@
                                 {
                                     <tr>
                                         <td>@(i++)</td>
-                                        <td>@Html.DisplayFor(modelItem => item.FoodItem.Name)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Name)</td>
                                         <td>@Html.DisplayFor(modelItem => item.OptionType.Name)</td>
-                                        <td>@Html.DisplayFor(modelItem => item.OptionValue.Name)</td>
                                         <td>@Html.DisplayFor(modelItem => item.DateAdded)</td>
                                         <td>
-                                            <a asp-action="EditFoodItemOption" asp-route-id="@protector.Encode(item.FoodItemOptionId.ToString())" asp-route-returnUrl="@protector.Encode(ViewBag.ReturnUrl)"><i class="las la-pen text-secondary font-16"></i></a>
+                                            <a asp-action="EditOptionValue" asp-route-id="@protector.Encode(item.OptionValueId.ToString())" asp-route-returnUrl="@protector.Encode(ViewBag.ReturnUrl)"><i class="las la-pen text-secondary font-16"></i></a>
                                         </td>
                                     </tr>
                                 }
@@ -63,7 +61,7 @@
                 </div>
                 <div class="card-Footer">
                     <div class="col">
-                        <a class="btn btn-outline-dark btn-sm px-4 " href="@ViewBag.ReturnUrl"><i class="fas fa-chevron-left"></i> Back</a>
+                        <a class="btn btn-outline-dark btn-sm px-4 " asp-controller="Home" asp-action="Index"><i class="fas fa-chevron-left"></i> Back</a>
                     </div><!--end col-->
                 </div>
             </div>

@@ -13,8 +13,10 @@ namespace ReachingFam.Core.Models
     {
         [Key]
         public int StockId { get; set; }
+        [Display(Name = "Donor")]
         public int DonorId { get; set; }
         public Donor Donor { get; set; }
+        [Display(Name = "Food Item")]
         public int FoodItemId { get; set; }
         public FoodItem FoodItem { get; set; }
         [Precision(18, 2)]
