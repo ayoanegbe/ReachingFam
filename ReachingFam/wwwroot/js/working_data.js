@@ -1,19 +1,47 @@
 ﻿
+var prd = document.getElementById("language").value;
+let graphData = document.getElementById("graphData").value;;
+
+gData = JSON.parse(graphData);
+console.log('families1', gData);
+console.log('families2', gData.familyHampers);
+console.log('partners', gData.partnerHampers);
+console.log('donors', gData.donors);
+console.log('categories', gData.categories);
+
+//$.ajax({
+//    url: '/home/GetGraphData/', 
+//    data: { period: prd },
+//    type: 'POSt',
+//    async: true,
+//    dataType: 'json',
+//    success: function (response) {
+//        graphData = response;
+//        console.log('graphData', graphData);
+        
+//        families = response.familyHampers;
+//        console.log('families1', response.familyHampers);
+//        console.log('families2', families);
+//        console.log('partners', graphData.partnerHampers);
+//        console.log('donors', graphData.donors);
+//        console.log('categories', graphData.categories);
+//    }
+//});
+
 var options = {
-
-
+    
     series: [{
-        name: 'Family Hampers',
+        name: 'Families',
         type: 'column',
-        data: [1.4, 2, 2.5, 1.5, 2.5, 2.8, 3.8, 4.6]
+        data: gData.families
     }, {
-        name: 'Partner Hampers',
+        name: 'Partners',
         type: 'column',
-        data: [1.1, 3, 3.1, 4, 4.1, 4.9, 6.5, 8.5]
+        data: gData.partners
     }, {
         name: 'Donors',
         type: 'line',
-        data: [20, 29, 37, 36, 44, 45, 50, 58]
+        data: gData.donors
     }],
     chart: {
         height: 350,
@@ -36,7 +64,7 @@ var options = {
         width: [1, 1, 4]
     },
     xaxis: {
-        categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
+        categories: gData.categories,
     },
     yaxis: [
         {

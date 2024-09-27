@@ -32,6 +32,7 @@
                     <form asp-action="EditFoodItemOption" asp-route-returnUrl="@protector.Encode(ViewBag.ReturnUrl)" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input type="hidden" asp-for="FoodItemOptionId" />
+                        <input type="hidden" asp-for="FoodItemId" />
                         @if (ViewBag.Message != null)
                         {
                             <div class="alert alert-danger alert-dismissible" role="alert">
@@ -47,12 +48,10 @@
                             </div>
                         }
                         <div class="form-group row">
-                            <div class="col-md-6 mb-3">
-                                <label class="col-form-label" asp-for="FoodItemId"></label>
-                                <select asp-for="FoodItemId" asp-items="ViewBag.FoodItemId" class="form-select" id="default">
-                                    <option selected="selected" value="">Please Select Food Item</option>
-                                </select>
-                                <span asp-validation-for="FoodItemId" class="text-danger"></span>
+                            <div class="col-md-4 mb-3">
+                                <label class="col-form-label" asp-for="FoodItem.Name">Food Item</label>
+                                <input asp-for="FoodItem.Name" type="text" placeholder="Name" class="form-control" readonly>
+                                <span asp-validation-for="FoodItem.Name" class="text-danger"></span>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="col-form-label" asp-for="OptionTypeId"></label>

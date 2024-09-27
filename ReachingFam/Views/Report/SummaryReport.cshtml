@@ -13,7 +13,7 @@
                         <li class="breadcrumb-item active">Summary Report</li>
                     </ol>
                 </div>
-                <h4 class="page-title">Summary Report</h4>
+                <h4 class="page-title">Summary Report - @Html.DisplayFor(model => model.Period)</h4>
             </div>
             <!--end page-title-box-->
         </div>
@@ -103,20 +103,20 @@
                                         }
                                         <tr>
                                             <td class="border-0 font-12 text-dark">Total</td>
-                                            <td class="border-0 font-12 text-dark">@Model.WeightIn</td>
+                                            <td class="border-0 font-12 text-dark">@FriendlyNumberHelper.FormatNumber(Model.WeightIn)</td>
                                             <td class="border-0 font-12 text-dark"></td>
-                                            <td class="border-0 font-12 text-dark">@Model.FamilyWeight</td>
-                                            <td class="border-0 font-12 text-dark">@Model.Families</td>
-                                            <td class="border-0 font-12 text-dark">@Model.Seniors</td>
-                                            <td class="border-0 font-12 text-dark">@Model.Adults</td>
-                                            <td class="border-0 font-12 text-dark">@Model.Children</td>
-                                            <td class="border-0 font-12 text-dark">@Model.PartnerWeight</td>
-                                            <td class="border-0 font-12 text-dark">@Model.Partners</td>
-                                            <td class="border-0 font-12 text-dark">@Model.VolunteerWeight</td>
-                                            <td class="border-0 font-12 text-dark">@Model.Volunteers</td>
-                                            <td class="border-0 font-12 text-dark">@Model.Hours</td>
-                                            <td class="border-0 font-12 text-dark">@Model.Waste</td>
-                                            <td class="border-0 font-12 text-dark">@Model.WeightOut</td>
+                                            <td class="border-0 font-12 text-dark">@FriendlyNumberHelper.FormatNumber(Model.FamilyWeight)</td>
+                                            <td class="border-0 font-12 text-dark">@FriendlyNumberHelper.FormatNumber(Model.Families)</td>
+                                            <td class="border-0 font-12 text-dark">@FriendlyNumberHelper.FormatNumber(Model.Seniors)</td>
+                                            <td class="border-0 font-12 text-dark">@FriendlyNumberHelper.FormatNumber(Model.Adults)</td>
+                                            <td class="border-0 font-12 text-dark">@FriendlyNumberHelper.FormatNumber(Model.Children)</td>
+                                            <td class="border-0 font-12 text-dark">@FriendlyNumberHelper.FormatNumber(Model.PartnerWeight)</td>
+                                            <td class="border-0 font-12 text-dark">@FriendlyNumberHelper.FormatNumber(Model.Partners)</td>
+                                            <td class="border-0 font-12 text-dark">@FriendlyNumberHelper.FormatNumber(Model.VolunteerWeight)</td>
+                                            <td class="border-0 font-12 text-dark">@FriendlyNumberHelper.FormatNumber(Model.Volunteers)</td>
+                                            <td class="border-0 font-12 text-dark">@FriendlyNumberHelper.FormatNumber(Model.Hours)</td>
+                                            <td class="border-0 font-12 text-dark">@FriendlyNumberHelper.FormatNumber(Model.Waste)</td>
+                                            <td class="border-0 font-12 text-dark">@FriendlyNumberHelper.FormatNumber(Model.WeightOut)</td>
                                         </tr><!--end tr-->
                                     </tbody>
                                 </table><!--end table-->

@@ -1,9 +1,12 @@
 ﻿using Newtonsoft.Json;
+using ReachingFam.Core.Enums;
 using ReachingFam.Core.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Runtime;
 using System.Security.Cryptography;
 using System.Text;
@@ -241,7 +244,7 @@ namespace ReachingFam.Core.Services
 
         public static DateTime GetDateofFOW()
         {
-            System.Globalization.CultureInfo ci = Thread.CurrentThread.CurrentCulture;
+            CultureInfo ci = Thread.CurrentThread.CurrentCulture;
             DayOfWeek fdow = ci.DateTimeFormat.FirstDayOfWeek;
             DayOfWeek today = DateTime.Now.DayOfWeek;
 
@@ -257,6 +260,16 @@ namespace ReachingFam.Core.Services
             }
         }
 
+        public static (DateTime, DateTime) PreviousWeek()
+        {
+            DateTime dateFDW = GetDateofFOW();
+
+            DateTime previousFDW = dateFDW.AddDays(-7);
+            DateTime previousLDW = dateFDW.AddDays(-1);
+
+            return (previousFDW, previousLDW);
+        }
+
         public static string GenerateUniqueNumber()
         {
             var timestampPart = DateTime.UtcNow.ToString("HHmmss"); // 6 digits from the current time
@@ -264,6 +277,6 @@ namespace ReachingFam.Core.Services
 
             return timestampPart + randomPart;
         }
-
+        
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ReachingFam.Core.Data;
 using ReachingFam.Core.Enums;
@@ -6,11 +7,6 @@ using ReachingFam.Core.Interfaces;
 using ReachingFam.Core.Models;
 using ReachingFam.Core.Models.ReachingFamViewModels;
 using ReachingFam.Core.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ReachingFam.Core.Repositories
 {
@@ -104,28 +100,6 @@ namespace ReachingFam.Core.Repositories
 
         }
 
-        public async Task<List<SummaryReportViewModel>> MonthlyReportData(DateTime startDate, DateTime endDate)
-        {
-            List<SummaryReportViewModel> monthlyReport = [];
-
-            int year = startDate.Year;
-            int month = endDate.Month;
-
-            int lastDay = endDate.Day;
-
-            for (int day = 1; day <= lastDay; day++)
-            {
-                DateTime date = new(year, month, day);
-
-                SummaryReportViewModel dailyReport = await SummaryReport(date);
-
-                if (dailyReport != null)
-                    monthlyReport.Add(dailyReport);
-            }
-
-            return monthlyReport;
-        }
-
         public async Task<SummaryReportViewModel> SummaryReport(DateTime date)
         {
             decimal donorWeight = await _context.InwardItems.Where(x => x.CollectionDate == date).SumAsync(x => x.TotalWeight);
@@ -184,7 +158,7 @@ namespace ReachingFam.Core.Repositories
             {
                 case AnalyticPeriod.ThisMonth:
                     startDate = new DateTime(date.Year, date.Month, 1);
-                    endDate = date;
+                    endDate = date;                                        
                     return await MonthlyReportData(startDate, endDate);
                 case AnalyticPeriod.ThisYear:
                     return await YearlyReportData(date.Year);
@@ -199,6 +173,28 @@ namespace ReachingFam.Core.Repositories
             }
 
             return [];
+        }
+
+        public async Task<List<SummaryReportViewModel>> MonthlyReportData(DateTime startDate, DateTime endDate)
+        {
+            List<SummaryReportViewModel> monthlyReport = [];
+
+            int year = startDate.Year;
+            int month = endDate.Month;
+
+            int lastDay = endDate.Day;
+
+            for (int day = 1; day <= lastDay; day++)
+            {
+                DateTime date = new(year, month, day);
+
+                SummaryReportViewModel dailyReport = await SummaryReport(date);
+
+                if (dailyReport != null)
+                    monthlyReport.Add(dailyReport);
+            }
+
+            return monthlyReport;
         }
 
         public async Task<List<SummaryReportViewModel>> WeeklyReportData(DateTime startDate, DateTime endDate)
@@ -292,8 +288,69 @@ namespace ReachingFam.Core.Repositories
                 TotalWeightIn = await _context.InwardItems.Where(x => x.CollectionDate >= startDate || x.CollectionDate <= endDate).SumAsync(x => x.TotalWeight),
                 FamilyWeight = await _context.Hampers.Where(x => x.CollectionDate >= startDate || x.CollectionDate <= endDate).SumAsync(x => x.Weight),
                 PartnerWeight = await _context.PartnerGiveOuts.Where(x => x.CollectionDate >= startDate || x.CollectionDate <= endDate).SumAsync(x => x.Weight),
-                VolunteerWeight = await _context.VolunteerGiveOuts.Where(x => x.CollectionDate >= startDate || x.CollectionDate <= endDate).SumAsync(x => x.Weight)
+                VolunteerWeight = await _context.VolunteerGiveOuts.Where(x => x.CollectionDate >= startDate || x.CollectionDate <= endDate).SumAsync(x => x.Weight),
             };
+        }
+
+        public CurrentPreviousDashboardViewModel ProcessDashboardFilter(CurrentPreviousDashboardViewModel dashboardViewModel)
+        {
+            var processedDashboard = new CurrentPreviousDashboardViewModel()
+            {
+                Current = dashboardViewModel.Current,
+                Previous = dashboardViewModel.Previous,
+                Period = dashboardViewModel.Period,
+                FooditemsBelowReorderLevel = dashboardViewModel.FooditemsBelowReorderLevel,
+                FamilyHampersForCollection = dashboardViewModel.FamilyHampersForCollection,
+                FamilyHampersCollected = dashboardViewModel.FamilyHampersCollected,
+                FamilyHampersNotCollected = dashboardViewModel.FamilyHampersNotCollected,
+                PartnerHampersForCollection = dashboardViewModel.PartnerHampersForCollection,
+                PartnerHampersCollected = dashboardViewModel.PartnerHampersCollected,
+                PartnerHampersNotCollected = dashboardViewModel.PartnerHampersNotCollected,
+                FamilyCountPercentage = dashboardViewModel.Previous.FamilyCount > 0 ? (dashboardViewModel.Previous.FamilyCount - dashboardViewModel.Current.FamilyCount) / dashboardViewModel.Previous.FamilyCount * 100 : 0,
+                FamilyWeightPercentage = dashboardViewModel.Previous.FamilyWeight > 0 ? (dashboardViewModel.Previous.FamilyWeight - dashboardViewModel.Current.FamilyWeight) / dashboardViewModel.Previous.FamilyWeight * 100 : 0,
+                SeniorCountPercentage = dashboardViewModel.Previous.SeniorCount > 0 ? (dashboardViewModel.Previous.SeniorCount - dashboardViewModel.Current.SeniorCount) / dashboardViewModel.Previous.SeniorCount * 100 : 0,
+                AdultCountPercentage = dashboardViewModel.Previous.AdultCount > 0 ? (dashboardViewModel.Previous.AdultCount - dashboardViewModel.Current.AdultCount) / dashboardViewModel.Previous.AdultCount * 100 : 0,
+                ChildrenCountPercentage = dashboardViewModel.Previous.ChildrenCount > 0 ? (dashboardViewModel.Previous.ChildrenCount - dashboardViewModel.Current.ChildrenCount) / dashboardViewModel.Previous.ChildrenCount * 100 : 0,
+                TotalHoursWorkedPercentage = dashboardViewModel.Previous.TotalHoursWorked > 0 ? (dashboardViewModel.Previous.TotalHoursWorked - dashboardViewModel.Current.TotalHoursWorked) / dashboardViewModel.Previous.TotalHoursWorked * 100 : 0,
+                TotalWeightInPercentage = dashboardViewModel.Previous.TotalWeightIn > 0 ? (dashboardViewModel.Previous.TotalWeightIn - dashboardViewModel.Current.TotalWeightIn) / dashboardViewModel.Previous.TotalWeightIn * 100 : 0,
+                TotalWeigthOutPercentage = dashboardViewModel.Previous.TotalWeightOut > 0 ? (dashboardViewModel.Previous.TotalWeightOut - dashboardViewModel.Current.TotalWeightOut) / dashboardViewModel.Previous.TotalWeightOut * 100 : 0,
+                PartnerWeightPercentage = dashboardViewModel.Previous.PartnerWeight > 0 ? (dashboardViewModel.Previous.PartnerWeight - dashboardViewModel.Current.PartnerWeight) / dashboardViewModel.Previous.PartnerWeight * 100 : 0,
+                VolunteerWeightPercentage = dashboardViewModel.Previous.VolunteerWeight > 0 ? (dashboardViewModel.Previous.VolunteerWeight - dashboardViewModel.Current.VolunteerWeight) / dashboardViewModel.Previous.VolunteerWeight * 100 : 0,
+                TotalWeightDistributed = dashboardViewModel.Current.TotalWeightIn + dashboardViewModel.Current.TotalWeightIn,
+                TotalEmergencyHampers = dashboardViewModel.Current.FamilyWeight + dashboardViewModel.Current.VolunteerWeight,
+            };
+
+            return processedDashboard;
+        }
+
+        public async Task<long> FamilyHampersForCollection()
+        {
+            return await _context.Hampers.Include(x => x.Family).Where(x => x.CollectionDate == DateTime.Today).CountAsync();
+        }
+
+        public async Task<long> FamilyHampersCollected()
+        {
+            return await _context.Hampers.Include(x => x.Family).Where(x => x.CollectionDate == DateTime.Today && x.Collected).CountAsync();
+        }
+
+        public async Task<long> FamilyHampersNotCollected()
+        {
+            return await _context.Hampers.Include(x => x.Family).Where(x => x.CollectionDate == DateTime.Today && !x.Collected).CountAsync();
+        }
+
+        public async Task<long> PartnerHampersForCollection()
+        {
+            return await _context.PartnerGiveOuts.Include(x => x.Partner).Where(x => x.CollectionDate == DateTime.Today).CountAsync();
+        }
+
+        public async Task<long> PartnerHampersCollected()
+        {
+            return await _context.PartnerGiveOuts.Include(x => x.Partner).Where(x => x.CollectionDate == DateTime.Today && x.Collected).CountAsync();
+        }
+
+        public async Task<long> PartnerHampersNotCollected()
+        {
+            return await _context.PartnerGiveOuts.Include(x => x.Partner).Where(x => x.CollectionDate == DateTime.Today && !x.Collected).CountAsync();
         }
     }
 }

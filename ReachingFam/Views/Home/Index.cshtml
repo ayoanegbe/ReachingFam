@@ -1,10 +1,40 @@
-﻿@model DashboardViewModel
+﻿@using System.ComponentModel.DataAnnotations
+@model CurrentPreviousDashboardViewModel
 
 @{
     ViewData["Title"] = "Home";
+
+    decimal totalWeight = Model.Current.TotalWeightOut;
+    decimal emergencyHampers = Model.Current.FamilyWeight + Model.Current.VolunteerWeight;
+    decimal partnerHampers = Model.Current.PartnerWeight;
+    decimal emergencyPercentage = totalWeight > 0 ? emergencyHampers / totalWeight * 100 : 0;
+    decimal partnerPercentage = totalWeight > 0 ? partnerHampers / totalWeight * 100 : 0;
+
+    string period = string.Empty;
+
+    switch (Model.Period)
+    {
+        case AnalyticPeriod.ThisMonth:
+            period = "Monthly";
+            break;
+        case AnalyticPeriod.LastMonth:
+            period = "Monthly";
+            break;
+        case AnalyticPeriod.ThisWeek:
+            period = "Weekly";
+            break;
+        case AnalyticPeriod.ThisYear:
+            period = "Yearly";
+            break;
+    }
+
+    var graphData = @Html.Raw(Json.Serialize(Model.GraphView));
 }
 
 <div class="container-fluid">
+    <input type="hidden" asp-for="@period" id="DataPeriod" />
+    <input type="hidden" asp-for="@graphData" id="graphData" />
+
     <!-- Page-Title -->
     <div class="row">
         <div class="col-sm-12">
@@ -17,7 +47,7 @@
                         <li class="breadcrumb-item active">Analytics</li>
                     </ol>
                 </div>
-                <h4 class="page-title">Analytics</h4>
+                <h4 class="page-title">Analytics - @Html.DisplayFor(model => model.Period)</h4>
             </div><!--end page-title-box-->
         </div><!--end col-->
     </div>
@@ -32,8 +62,8 @@
                             <div class="row d-flex justify-content-center">
                                 <div class="col-9">
                                     <p class="text-dark mb-0 fw-semibold">Families</p>
-                                    <h3 class="my-1 font-20 fw-bold">159</h3>
-                                    <p class="mb-0 text-truncate text-muted"><span class="text-success"><i class="mdi mdi-trending-up"></i>8.5%</span> New Families Hampers</p>
+                                    <h3 class="my-1 font-20 fw-bold">@Model.Current.FamilyCount</h3>
+                                    <p class="mb-0 text-truncate text-muted"><span class="@(Model.FamilyCountPercentage > 0 ? "text-success" : (Model.FamilyCountPercentage < 0 ? "text-danger" : "text-info"))"><i class="mdi @(Model.FamilyCountPercentage > 0 ? "mdi-trending-up" : (Model.FamilyCountPercentage < 0 ? "mdi-trending-down" : "mdi-trending-neutral"))"></i>@Model.FamilyCountPercentage%</span> @period change</p>
                                 </div><!--end col-->
                                 <div class="col-3 align-self-center">
                                     <div class="d-flex justify-content-center align-items-center thumb-md bg-light-alt rounded-circle mx-auto">
@@ -50,8 +80,8 @@
                             <div class="row d-flex justify-content-center">
                                 <div class="col-9">
                                     <p class="text-dark mb-0 fw-semibold">Adults</p>
-                                    <h3 class="my-1 font-20 fw-bold">597</h3>
-                                    <p class="mb-0 text-truncate text-muted"><span class="text-success"><i class="mdi mdi-trending-up"></i>1.5%</span> Weekly Avg. Hours</p>
+                                    <h3 class="my-1 font-20 fw-bold">@FriendlyNumberHelper.FormatNumber(Model.Current.AdultCount)</h3>
+                                    <p class="mb-0 text-truncate text-muted"><span class="@(Model.AdultCountPercentage > 0 ? "text-success" : (Model.AdultCountPercentage < 0 ? "text-danger" : "text-info"))"><i class="mdi @(Model.AdultCountPercentage > 0 ? "mdi-trending-up" : (Model.AdultCountPercentage < 0 ? "mdi-trending-down" : "mdi-trending-neutral"))"></i>@Model.AdultCountPercentage%</span> @period change</p>
                                 </div><!--end col-->
                                 <div class="col-3 align-self-center">
                                     <div class="d-flex justify-content-center align-items-center thumb-md bg-light-alt rounded-circle mx-auto">
@@ -68,8 +98,8 @@
                             <div class="row d-flex justify-content-center">
                                 <div class="col-9">
                                     <p class="text-dark mb-0 fw-semibold">Children</p>
-                                    <h3 class="my-1 font-20 fw-bold">334</h3>
-                                    <p class="mb-0 text-truncate text-muted"><span class="text-danger"><i class="mdi mdi-trending-down"></i>35%</span> Bounce Rate Weekly</p>
+                                    <h3 class="my-1 font-20 fw-bold">@FriendlyNumberHelper.FormatNumber(Model.Current.ChildrenCount)</h3>
+                                    <p class="mb-0 text-truncate text-muted"><span class="@(Model.ChildrenCountPercentage > 0 ? "text-success" : (Model.ChildrenCountPercentage < 0 ? "text-danger" : "text-info"))"><i class="mdi @(Model.FamilyCountPercentage > 0 ? "mdi-trending-up" : (Model.FamilyCountPercentage < 0 ? "mdi-trending-down" : "mdi-trending-neutral"))"></i>@Model.ChildrenCountPercentage%</span> @period change</p>
                                 </div><!--end col-->
                                 <div class="col-3 align-self-center">
                                     <div class="d-flex justify-content-center align-items-center thumb-md bg-light-alt rounded-circle mx-auto">
@@ -86,8 +116,8 @@
                             <div class="row d-flex justify-content-center">
                                 <div class="col-9">
                                     <p class="text-dark mb-0 fw-semibold">Hours Worked</p>
-                                    <h3 class="my-1 font-20 fw-bold">597</h3>
-                                    <p class="mb-0 text-truncate text-muted"><span class="text-success"><i class="mdi mdi-trending-up"></i>1.5%</span> Weekly Avg. Hours</p>
+                                    <h3 class="my-1 font-20 fw-bold">@FriendlyNumberHelper.FormatNumber(Model.Current.TotalHoursWorked)</h3>
+                                    <p class="mb-0 text-truncate text-muted"><span class="@(Model.TotalHoursWorkedPercentage > 0 ? "text-success" : (Model.TotalHoursWorkedPercentage < 0 ? "text-danger" : "text-info"))"><i class="mdi @(Model.TotalHoursWorkedPercentage > 0 ? "mdi-trending-up" : (Model.TotalHoursWorkedPercentage < 0 ? "mdi-trending-down" : "mdi-trending-neutral"))"></i>@Model.TotalHoursWorkedPercentage%</span> @period change</p>
                                 </div><!--end col-->
                                 <div class="col-3 align-self-center">
                                     <div class="d-flex justify-content-center align-items-center thumb-md bg-light-alt rounded-circle mx-auto">
@@ -104,8 +134,8 @@
                             <div class="row d-flex justify-content-center">
                                 <div class="col-9">
                                     <p class="text-dark mb-0 fw-semibold">Total Weight IN</p>
-                                    <h3 class="my-1 font-20 fw-bold">25K lbs</h3>
-                                    <p class="mb-0 text-truncate text-muted"><span class="text-success"><i class="mdi mdi-trending-up"></i>1.5%</span> Weekly Avg. Hours</p>
+                                    <h3 class="my-1 font-20 fw-bold">@FriendlyNumberHelper.FormatNumber(Model.Current.TotalWeightIn) lbs</h3>
+                                    <p class="mb-0 text-truncate text-muted"><span class="@(Model.TotalWeightInPercentage > 0 ? "text-success" : (Model.TotalWeightInPercentage < 0 ? "text-danger" : "text-info"))"><i class="mdi @(Model.TotalWeightInPercentage > 0 ? "mdi-trending-up" : (Model.TotalWeightInPercentage < 0 ? "mdi-trending-down" : "mdi-trending-neutral"))"></i>@Model.TotalWeightInPercentage%</span> @period change</p>
                                 </div><!--end col-->
                                 <div class="col-3 align-self-center">
                                     <div class="d-flex justify-content-center align-items-center thumb-md bg-light-alt rounded-circle mx-auto">
@@ -122,8 +152,8 @@
                             <div class="row d-flex justify-content-center">
                                 <div class="col-9">
                                     <p class="text-dark mb-0 fw-semibold">Total Weight OUT</p>
-                                    <h3 class="my-1 font-20 fw-bold">23.2K lbs</h3>
-                                    <p class="mb-0 text-truncate text-muted"><span class="text-success"><i class="mdi mdi-trending-up"></i>1.5%</span> Weekly Avg. Hours</p>
+                                    <h3 class="my-1 font-20 fw-bold">@FriendlyNumberHelper.FormatNumber(Model.Current.TotalWeightOut) lbs</h3>
+                                    <p class="mb-0 text-truncate text-muted"><span class="@(Model.TotalWeigthOutPercentage > 0 ? "text-success" : (Model.TotalWeigthOutPercentage < 0 ? "text-danger" : "text-info"))"><i class="mdi @(Model.TotalWeigthOutPercentage > 0 ? "mdi-trending-up" : (Model.TotalWeigthOutPercentage < 0 ? "mdi-trending-down" : "mdi-trending-neutral"))"></i>@Model.TotalWeigthOutPercentage%</span> @period change</p>
                                 </div><!--end col-->
                                 <div class="col-3 align-self-center">
                                     <div class="d-flex justify-content-center align-items-center thumb-md bg-light-alt rounded-circle mx-auto">
@@ -168,24 +198,24 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="apexchart-wrapper">
-                            <span class="h4 fw-bold">23,210 lbs</span>
+                            <span class="h4 fw-bold">@FriendlyNumberHelper.FormatNumber(totalWeight) lbs</span>
                             <h6 class="text-uppercase text-muted mt-2 m-0 font-11">Total <strong>Pounds</strong> of food distributed</h6>
                             <div class="progress mt-3 rounded">
-                                <div class="progress-bar bg-primary" role="progressbar" style="width: 67%" aria-valuenow="67" aria-valuemin="0" aria-valuemax="100">67%</div>
-                                <div class="progress-bar bg-info" role="progressbar" style="width: 33%" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100">33%</div>
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: @emergencyPercentage%" aria-valuenow="67" aria-valuemin="0" aria-valuemax="100">@emergencyPercentage%</div>
+                                <div class="progress-bar bg-info" role="progressbar" style="width: @partnerPercentage%" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100">@partnerPercentage%</div>
                             </div>
                             <ul class="list-unstyled mb-0">
                                 <li class="list-item mt-3 fw-semibold d-flex justify-content-between align-items-center">
                                     <span>
                                         <i class="fas fa-circle font-10 text-primary me-2"></i>Emergency Food Hampers
                                     </span>
-                                    <p class="align-self-center mb-0 fw-semibold">15,550 lbs</p>
+                                    <p class="align-self-center mb-0 fw-semibold">@FriendlyNumberHelper.FormatNumber(emergencyHampers) lbs</p>
                                 </li>
                                 <li class="list-item mt-2 fw-semibold d-flex justify-content-between align-items-center">
                                     <span>
                                         <i class="fas fa-circle font-10 text-info me-2"></i>Agency Partners/Others
                                     </span>
-                                    <p class="align-self-center mb-0 fw-semibold">7,660 lbs</p>
+                                    <p class="align-self-center mb-0 fw-semibold">@FriendlyNumberHelper.FormatNumber(partnerHampers) lbs</p>
                                 </li>
                             </ul>
                         </div>
@@ -204,25 +234,30 @@
                                 <thead>
                                     <tr>
                                         <th></th>
-                                        <th class="text-end">Total</th>
+                                        <th class="text-end">For Collection</th>
                                         <th class="text-end">Collected</th>
                                         <th class="text-end">Remaining</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>Families</td>
-                                        <td class="text-end">8</td>
-                                        <td class="text-end">3</td>
-                                        <td class="text-end">5</td>
+                                        <td class="text-blue">Families</td>
+                                        <td class="text-end text-blue">@FriendlyNumberHelper.FormatNumber(Model.FamilyHampersForCollection)</td>
+                                        <td class="text-end text-blue">@FriendlyNumberHelper.FormatNumber(Model.FamilyHampersCollected)</td>
+                                        <td class="text-end text-blue">@FriendlyNumberHelper.FormatNumber(Model.FamilyHampersNotCollected)</td>
                                     </tr>
                                     <tr>
-                                        <td>Partners</td>
-                                        <td class="text-end">5</td>
-                                        <td class="text-end">2</td>
-                                        <td class="text-end">3</td>
+                                        <td class="text-blue">Partners</td>
+                                        <td class="text-end text-blue">@FriendlyNumberHelper.FormatNumber(Model.PartnerHampersForCollection)</td>
+                                        <td class="text-end text-blue">@FriendlyNumberHelper.FormatNumber(Model.PartnerHampersCollected)</td>
+                                        <td class="text-end text-blue">@FriendlyNumberHelper.FormatNumber(Model.PartnerHampersNotCollected)</td>
                                     </tr>
-                                    
+                                    <tr>
+                                        <td>Total</td>
+                                        <td class="text-end">@FriendlyNumberHelper.FormatNumber((Model.PartnerHampersForCollection + Model.PartnerHampersForCollection))</td>
+                                        <td class="text-end">@FriendlyNumberHelper.FormatNumber((Model.PartnerHampersCollected + Model.PartnerHampersCollected))</td>
+                                        <td class="text-end">@FriendlyNumberHelper.FormatNumber((Model.PartnerHampersNotCollected + Model.PartnerHampersNotCollected))</td>
+                                    </tr>
                                 </tbody>
                             </table><!--end /table-->
                         </div><!--end /div-->

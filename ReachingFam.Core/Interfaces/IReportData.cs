@@ -19,5 +19,12 @@ namespace ReachingFam.Core.Interfaces
         Task<HamperReportViewModel> HampersReport();
         FinalReportViewModel SummarizeReportData(List<SummaryReportViewModel> summaryReports);
         Task<DashboardViewModel> DashboardFilter(DateTime startDate, DateTime endDate);
+        CurrentPreviousDashboardViewModel ProcessDashboardFilter(CurrentPreviousDashboardViewModel dashboardViewModel);
+        Task<long> FamilyHampersForCollection();
+        Task<long> FamilyHampersCollected();
+        Task<long> FamilyHampersNotCollected();
+        Task<long> PartnerHampersForCollection();
+        Task<long> PartnerHampersCollected();
+        Task<long> PartnerHampersNotCollected();
     }
 }

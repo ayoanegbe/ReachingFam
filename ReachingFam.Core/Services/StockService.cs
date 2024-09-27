@@ -15,7 +15,7 @@ namespace ReachingFam.Core.Services
 
         public async Task<List<FoodItem>> GetFooditemsBelowReorderLevel()
         {
-            return await _context.FoodItems.Where(p => p.Stocks.Sum(s => s.Quantity) < p.ReorderLevel).ToListAsync();
+            return await _context.FoodItems.Where(p => p.Stocks.Sum(s => s.Quantity) <= p.ReorderLevel).ToListAsync();
         }
 
         public async Task<decimal> FoodItemReorderLevel(int id)

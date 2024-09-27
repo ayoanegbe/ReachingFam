@@ -119,6 +119,7 @@ namespace ReachingFam.Controllers
                 }
                 else
                 {
+                    ViewData["Message"] = "Invalid login attempt.";
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return View(model);
                 }

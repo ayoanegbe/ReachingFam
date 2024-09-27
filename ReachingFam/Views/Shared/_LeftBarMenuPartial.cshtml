@@ -102,6 +102,9 @@
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Setup" asp-action="ListOptionValues">Option Values</a>
                     </li><!--end nav-item-->
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Setup" asp-action="ListItemCategories">Item Categories</a>
+                    </li>
                 </ul><!--end nav-->
             </div><!-- end Crypto -->
 
@@ -135,31 +138,18 @@
                 <div class="title-box">
                     <h6 class="menu-title">Stock Management</h6>
                 </div>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="ProcessManagement" asp-action="ListItemCategories">Food Items Categories</a>
-                    </li>
-                </ul>
+                
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="ProcessManagement" asp-action="ListFoodItems">Food Items</a>
                     </li>
-                </ul>
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="ProcessManagement" asp-action="ListFoodItemOptions">Food Item Options</a>
-                    </li>
-                </ul>
-                <ul class="nav flex-column">
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="ProcessManagement" asp-action="ListStocks">Stock Items</a>
                     </li>
-                </ul>
-                <ul class="nav flex-column">
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="ProcessManagement" asp-action="AddStock">Add Stock</a>
                     </li>
-                </ul>
+                </ul>                
 
                 <div class="title-box">
                     <h6 class="menu-title">Approvals</h6>
@@ -197,6 +187,11 @@
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Report" asp-action="SummaryReport" asp-route-Period="@AnalyticPeriod.ThisMonth">Summary Report</a>
+                    </li><!--end nav-item-->
+                </ul>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Report" asp-action="GeneralReport" asp-route-Period="@AnalyticPeriod.ThisMonth">General Report</a>
                     </li><!--end nav-item-->
                 </ul>
             </div>

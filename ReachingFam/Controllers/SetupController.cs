@@ -893,6 +893,137 @@ namespace ReachingFam.Controllers
 
             return View(optionValueView);
         }
+
+        public async Task<IActionResult> ListItemCategories()
+        {
+            ViewData["ReturnUrl"] = HttpContext.Request.Path;
+
+            return View(await _context.ItemCategories.ToListAsync());
+        }
+
+        public IActionResult AddItemCategory()
+        {
+            return View(new ItemCategoryViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddItemCategory([Bind("Name,Description")] ItemCategoryViewModel itemCategoryView)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            ItemCategory itemCategory = new()
+            {
+                Name = itemCategoryView.Name,
+                Description = itemCategoryView.Description,
+                AddedBy = user.UserName,
+                DateAdded = DateTime.Now
+            };
+
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    await _context.AddAsync(itemCategory);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(ListItemCategories));
+                }
+                else
+                {
+                    ViewBag.Message = "Unable to save changes. " +
+                        "Try again, and if the problem persists, " +
+                        "see your system administrator.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, ex, $"An error has occurred when trying to write into {itemCategory.GetType().Name} table");
+            }
+
+            return View(itemCategoryView);
+        }
+
+        public async Task<IActionResult> EditItemCategory(string id, string returnUrl = null)
+        {
+            if (id == null)
+            {
+                //Not Found
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            var itemCategory = await _context.ItemCategories.FirstOrDefaultAsync(x => x.ItemCategoryId == num);
+            if (itemCategory == null)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            string retUrl = string.Empty;
+            if (returnUrl != null)
+            {
+                retUrl = _resolverService.ResolveString(returnUrl);
+            }
+
+            ItemCategoryViewModel itemCategoryView = new()
+            {
+                ItemCategoryId = itemCategory.ItemCategoryId,
+                Name = itemCategory.Description,
+                Description = itemCategory.Description
+            };
+
+            ViewData["ReturnUrl"] = retUrl;
+
+            return View(itemCategoryView);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditItemCategory(string id, [Bind("ItemCategoryId,Name,Description")] ItemCategoryViewModel itemCategoryView, string returnUrl = null)
+        {
+            int num = _resolverService.ResolveInterger(id);
+            if (num == 0)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 500 });
+            }
+
+            if (num != itemCategoryView.ItemCategoryId)
+            {
+                return RedirectToAction(nameof(ErrorController.Error), new { Controller = "Error", Action = "Error", code = 404 });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            ItemCategory itemCategory = new()
+            {
+                ItemCategoryId = itemCategoryView.ItemCategoryId,
+                Name = itemCategoryView.Name,
+                Description = itemCategoryView.Description,
+                UpdatedBy = user.UserName,
+                DateUpdated = DateTime.Now
+            };
+
+            var oldValue = JsonConvert.SerializeObject(await _context.ItemCategories.FirstOrDefaultAsync(x => x.ItemCategoryId == itemCategory.ItemCategoryId));
+            var newValue = JsonConvert.SerializeObject(itemCategory);
+
+            if (await _approvalService.UpdateApprovalQueue(itemCategory.GetType().Name, "ItemCategory", UpdateAction.Update, oldValue, newValue, user.UserName))
+            {
+                return RedirectToAction(nameof(Confirmation), new { url = returnUrl });
+            }
+            else
+            {
+                ViewBag.Message = "Unable to save changes. " +
+                    "Try again, and if the problem persists, " +
+                    "see your system administrator.";
+            }
+
+            return View(itemCategoryView);
+        }
     }
 
 }
