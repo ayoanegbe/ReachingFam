@@ -7,13 +7,12 @@ using System.Threading.Tasks;
 
 namespace ReachingFam.Core.Models
 {
-    public class OptionValue : BaseEntity
+    public class CookingItem
     {
         [Key]
-        public int OptionValueId { get; set; }
-        [Display(Name = "Option Type")]
-        public int OptionTypeId { get; set; }
-        public OptionType OptionType { get; set; }
+        public int CookingItemId { get; set; }
+        public int RequestFormId { get; set; }
+        public RequestForm RequestForm { get; set; }
         public string Name { get; set; }
     }
 }

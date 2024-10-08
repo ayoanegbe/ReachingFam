@@ -140,6 +140,15 @@ namespace ReachingFam.Core.Data
                 logger.LogDebug($"Created the role '{user}' successfully");
             }
 
+            //var apiUser = "API User";
+            //logger.LogInformation($"Create the role '{apiUser}' for application");
+            //if (!await roleManager.RoleExistsAsync(user))
+            //{
+            //    var role = new IdentityRole(apiUser);
+            //    await roleManager.CreateAsync(role);
+            //    logger.LogDebug($"Created the role '{apiUser}' successfully");
+            //}
+
         }
 
         private static async Task SeedUOM(ApplicationDbContext context, IWebHostEnvironment environment, ILogger<DbInitializer> logger)

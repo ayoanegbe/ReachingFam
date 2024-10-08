@@ -1698,8 +1698,8 @@ namespace ReachingFam.Controllers
 
         public IActionResult AddFoodItem()
         {
-            ViewData["ItemCategoryId"] = new SelectList(_context.ItemCategories, "ItemCategoryId", "Name");
-            ViewData["UnitOfMeasureId"] = new SelectList(_context.UnitOfMeasures, "UnitOfMeasureId", "Name");
+            ViewData["ItemCategoryId"] = new SelectList(_context.ItemCategories.OrderBy(x => x.Name), "ItemCategoryId", "Name");
+            ViewData["UnitOfMeasureId"] = new SelectList(_context.UnitOfMeasures.OrderBy(x => x.Name), "UnitOfMeasureId", "Name");
 
             return View(new FoodItemViewModel());
         }
@@ -1743,8 +1743,8 @@ namespace ReachingFam.Controllers
                 _logger.Log(LogLevel.Error, ex, $"An error has occurred when trying to write into {foodItem.GetType().Name} table");
             }
 
-            ViewData["ItemCategoryId"] = new SelectList(_context.ItemCategories, "ItemCategoryId", "Name");
-            ViewData["UnitOfMeasureId"] = new SelectList(_context.UnitOfMeasures, "UnitOfMeasureId", "Name");
+            ViewData["ItemCategoryId"] = new SelectList(_context.ItemCategories.OrderBy(x => x.Name), "ItemCategoryId", "Name");
+            ViewData["UnitOfMeasureId"] = new SelectList(_context.UnitOfMeasures.OrderBy(x => x.Name), "UnitOfMeasureId", "Name");
 
             return View(foodItemView);
         }
@@ -1789,8 +1789,8 @@ namespace ReachingFam.Controllers
             };
 
             ViewData["ReturnUrl"] = retUrl;
-            ViewData["ItemCategoryId"] = new SelectList(_context.ItemCategories, "ItemCategoryId", "Name", foodItemView.FoodItemId);
-            ViewData["UnitOfMeasureId"] = new SelectList(_context.UnitOfMeasures, "UnitOfMeasureId", "Name", foodItemView.FoodItemId);
+            ViewData["ItemCategoryId"] = new SelectList(_context.ItemCategories.OrderBy(x => x.Name), "ItemCategoryId", "Name", foodItemView.FoodItemId);
+            ViewData["UnitOfMeasureId"] = new SelectList(_context.UnitOfMeasures.OrderBy(x => x.Name), "UnitOfMeasureId", "Name", foodItemView.FoodItemId);
 
             return View(foodItemView);
         }
@@ -1845,8 +1845,8 @@ namespace ReachingFam.Controllers
                     "see your system administrator.";
             }
 
-            ViewData["ItemCategoryId"] = new SelectList(_context.ItemCategories, "ItemCategoryId", "Name", foodItemView.FoodItemId);
-            ViewData["UnitOfMeasureId"] = new SelectList(_context.UnitOfMeasures, "UnitOfMeasureId", "Name", foodItemView.FoodItemId);
+            ViewData["ItemCategoryId"] = new SelectList(_context.ItemCategories.OrderBy(x => x.Name), "ItemCategoryId", "Name", foodItemView.FoodItemId);
+            ViewData["UnitOfMeasureId"] = new SelectList(_context.UnitOfMeasures.OrderBy(x => x.Name), "UnitOfMeasureId", "Name", foodItemView.FoodItemId);
 
             return View(foodItemView);
         }

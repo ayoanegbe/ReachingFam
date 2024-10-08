@@ -6,14 +6,10 @@ using System.Threading.Tasks;
 
 namespace ReachingFam.Core.Enums
 {
-    public enum CoffeeType
+    public enum ResponseStatus
     {
-        None = 0,
-        Decaf = 1,
-        Instant = 2,
-        Flavored = 3,
-        Beans = 4,
-        Ground = 5,
-        Keurig = 6,
+        Success = 200,
+        Unauthorized = 400,
+        Failed = 500
     }
 }

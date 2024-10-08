@@ -11,8 +11,12 @@ namespace ReachingFam.Core.Data
         {
         }
 
+        public DbSet<ApiUser> ApiUsers { get; set; }
         public DbSet<ApprovalNotification> ApprovalNotifications { get; set; }
         public DbSet<ApprovalQueue> Approvals { get; set; }
+        public DbSet<CoffeeType> CoffeeTypes { get; set; }
+        public DbSet<CookingItem> CookingItems { get; set; }
+        public DbSet<Disability> Disabilities { get; set; }
         public DbSet<Donor> Donors { get; set; }
         public DbSet<Family> Families { get; set; }
         public DbSet<FoodItem> FoodItems { get; set; }
@@ -29,11 +33,13 @@ namespace ReachingFam.Core.Data
         public DbSet<PartnerGiveOut> PartnerGiveOuts { get; set; }
         public DbSet<PartnerHamperItem> PartnerHamperItems { get; set; }
         public DbSet<PhotoSpeak> PhotoSpeaks { get; set; }
+        public DbSet<RequestForm> RequestForms { get; set; }
         public DbSet<SignIn> SignIns { get; set; }
         public DbSet<SmtpSetting> SmtpSettings { get; set; }
         public DbSet<Stock> Stocks { get; set; }
         public DbSet<StockTransaction> StockTransactions { get; set; }
         public DbSet<UnitOfMeasure> UnitOfMeasures { get; set; }
+        public DbSet<VoiceTextMessage> VoiceTextMessages { get; set; }
         public DbSet<VolunteerGiveOut> VolunteerGiveOuts { get; set; }
         public DbSet<VolunteerHamperItem> VolunteerHamperItems { get; set; }
         public DbSet<Waste> Wastes { get; set; }

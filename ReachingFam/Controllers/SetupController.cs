@@ -641,6 +641,8 @@ namespace ReachingFam.Controllers
 
         public IActionResult AddOptionType() {  return View(new OptionTypeViewModel()); }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddOptionType([Bind("Name")] OptionTypeViewModel optionTypeView)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -766,9 +768,11 @@ namespace ReachingFam.Controllers
         public IActionResult AddOptionValue() 
         {
             ViewData["OptionTypeId"] = new SelectList(_context.OptionTypes, "OptionTypeId", "Name");
-            return View(new OptionTypeViewModel()); 
+            return View(new OptionValueViewModel()); 
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddOptionValue([Bind("OptionTypeId,Name")] OptionValueViewModel optionValueView)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -898,7 +902,7 @@ namespace ReachingFam.Controllers
         {
             ViewData["ReturnUrl"] = HttpContext.Request.Path;
 
-            return View(await _context.ItemCategories.ToListAsync());
+            return View(await _context.ItemCategories.OrderByDescending(x => x.DateAdded).ToListAsync());
         }
 
         public IActionResult AddItemCategory()
